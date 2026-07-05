@@ -3,6 +3,7 @@ import sys
 import logging
 import requests
 import json
+import time
 
 # Configure logging to output to stdout
 logging.basicConfig(
@@ -11,7 +12,9 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)]
 )
 
+
 def main():
+    start_time = time.time()
     api_token = os.getenv("EODHD_API_TOKEN")
     symbols_str = os.getenv("SYMBOLS", "AAPL.US,GOOGL.US")
     symbols = [s.strip() for s in symbols_str.split(",") if s.strip()]
@@ -81,7 +84,9 @@ def main():
         except requests.exceptions.RequestException as e:
             logging.error(f"Error fetching EOD data for {symbol}: {e}")
 
+    logging.info("Total time to retrieve data: {} seconds".format(time.time() - start_time))
     logging.info("Data retrieval job completed successfully.")
+
 
 if __name__ == "__main__":
     main()
