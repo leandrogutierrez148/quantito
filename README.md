@@ -38,3 +38,8 @@ docker build -t quantito-job .
 # Run the container
 docker run --env EODHD_API_TOKEN="your-token-here" quantito-job
 ```
+
+### Deployment
+
+For detailed information on the deployment architecture, configuration decisions, and the CI/CD pipeline on Google Cloud Platform (GCP), see [DEPLOYMENT.md](file:///Users/lgutierrez/Proyectos/quantito/DEPLOYMENT.md).
+
