@@ -49,51 +49,44 @@ def store_data(data):
         logging.info("BIGQUERY_DATASET is not configured. Skipping BigQuery storage.")
         return
 
+    from google.cloud import bigquery
+    from google.api_core.exceptions import NotFound
+
+    client = bigquery.Client()
+    dataset_ref = client.dataset(bq_dataset)
+
     try:
-        from google.cloud import bigquery
-        from google.api_core.exceptions import NotFound
-        
-        client = bigquery.Client()
-        dataset_ref = client.dataset(bq_dataset)
-        
-        # Ensure dataset exists
-        try:
-            client.get_dataset(dataset_ref)
-        except NotFound:
-            dataset = bigquery.Dataset(dataset_ref)
-            dataset.location = os.getenv("BIGQUERY_LOCATION", "US")
-            client.create_dataset(dataset)
-            logging.info(f"Created BigQuery dataset: {bq_dataset}")
+        client.get_dataset(dataset_ref)
+    except NotFound:
+        dataset = bigquery.Dataset(dataset_ref)
+        dataset.location = os.getenv("BIGQUERY_LOCATION", "US")
+        client.create_dataset(dataset)
+        logging.info(f"Created BigQuery dataset: {bq_dataset}")
 
-        create_bq_table_if_not_exists(client, dataset_ref, "delayed_quotes")
-        
-        now_str = datetime.datetime.utcnow().isoformat()
-        rows = []
-        for row in data:
-            new_row = {
-                "symbol": row.get("symbol"),
-                "exchange": row.get("exchange"),
-                "open": row.get("open"),
-                "high": row.get("high"),
-                "low": row.get("low"),
-                "lastTradePrice": row.get("lastTradePrice"),
-                "volume": row.get("volume"),
-                "timestamp": row.get("timestamp"),
-                "inserted_at": now_str,
-            }
-            rows.append(new_row)
+    create_bq_table_if_not_exists(client, dataset_ref, "delayed_quotes")
 
-        table_ref = dataset_ref.table("delayed_quotes")
-        errors = client.insert_rows_json(table_ref, rows)
-        if errors:
-            logging.error(f"Errors inserting delayed quotes into BigQuery: {errors}")
-        else:
-            logging.info(f"Inserted {len(rows)} delayed quotes into BigQuery.")
-            
-    except ImportError:
-        logging.warning("google-cloud-bigquery is not installed. Skipping BigQuery storage.")
-    except Exception as e:
-        logging.error(f"Failed storing data to BigQuery: {e}")
+    now_str = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    rows = []
+    for row in data:
+        new_row = {
+            "symbol": row.get("symbol"),
+            "exchange": row.get("exchange"),
+            "open": row.get("open"),
+            "high": row.get("high"),
+            "low": row.get("low"),
+            "lastTradePrice": row.get("lastTradePrice"),
+            "volume": row.get("volume"),
+            "timestamp": row.get("timestamp"),
+            "inserted_at": now_str,
+        }
+        rows.append(new_row)
+
+    table_ref = dataset_ref.table("delayed_quotes")
+    errors = client.insert_rows_json(table_ref, rows)
+    if errors:
+        raise RuntimeError(f"Errors inserting delayed quotes into BigQuery: {errors}")
+
+    logging.info(f"Inserted {len(rows)} delayed quotes into BigQuery.")
 
 def run():
     logging.info("Starting US Delayed Quotes Pipeline.")
@@ -102,8 +95,7 @@ def run():
     symbols = [s.strip() for s in symbols_str.split(",") if s.strip()]
 
     if not api_token:
-        logging.error("EODHD_API_TOKEN is not set.")
-        sys.exit(1)
+        raise RuntimeError("EODHD_API_TOKEN is not set.")
 
     if not symbols:
         logging.warning("No symbols to retrieve.")
@@ -126,9 +118,8 @@ def run():
         if isinstance(res_json, dict) and "data" in res_json:
             raw_quotes = list(res_json["data"].values())
             
-    except Exception as e:
-        logging.error(f"Error fetching US delayed quotes: {e}")
-        sys.exit(1)
+    except Exception:
+        raise RuntimeError("Error fetching US delayed quotes.") from None
 
     # Processing step
     processed_quotes = []

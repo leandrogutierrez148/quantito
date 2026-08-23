@@ -12,8 +12,9 @@ WORKDIR /app
 COPY pyproject.toml README.md ./
 RUN pip install --no-cache-dir .
 
-# Copy the application code
-COPY . .
+# Copy only the runtime code required by the job.
+COPY main.py ./main.py
+COPY pipelines ./pipelines
 
 # Create a non-privileged user for better security and switch to it
 RUN useradd -u 10001 appuser && chown -R appuser /app
