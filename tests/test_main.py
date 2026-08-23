@@ -34,12 +34,15 @@ class MainTests(unittest.TestCase):
         def importer(module_name):
             short_name = module_name.rsplit(".", 1)[-1]
             if short_name == "delayed":
+
                 def run():
                     executed.append(short_name)
                     raise RuntimeError("boom")
             else:
+
                 def run():
                     executed.append(short_name)
+
             return types.SimpleNamespace(run=run)
 
         exit_code = main.main(

@@ -8,13 +8,14 @@ ENV PYTHONUNBUFFERED=1 \
 # Set the working directory in the container
 WORKDIR /app
 
-# Install dependencies from pyproject.toml (cached layer)
+# Install dependencies from pyproject.toml
 COPY pyproject.toml README.md ./
 RUN pip install --no-cache-dir .
 
-# Copy only the runtime code required by the job.
+# Copy only required application runtime modules
 COPY main.py ./main.py
 COPY pipelines ./pipelines
+COPY engine ./engine
 
 # Create a non-privileged user for better security and switch to it
 RUN useradd -u 10001 appuser && chown -R appuser /app

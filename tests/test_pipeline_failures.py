@@ -74,17 +74,20 @@ class PipelineFailureTests(unittest.TestCase):
         os.environ.update(self.original_env)
 
     def test_real_time_storage_failure_is_not_hidden(self):
-        with mock.patch.object(
-            real_time.requests,
-            "get",
-            return_value=FakeResponse([{"code": "AAPL.US", "close": 123.4}]),
-        ), mock.patch.object(
-            real_time,
-            "store_data",
-            side_effect=RuntimeError("bigquery failed"),
+        with (
+            mock.patch.object(
+                real_time.requests,
+                "get",
+                return_value=FakeResponse([{"code": "AAPL.US", "close": 123.4}]),
+            ),
+            mock.patch.object(
+                real_time,
+                "store_data",
+                side_effect=RuntimeError("bigquery failed"),
+            ),
+            self.assertRaisesRegex(RuntimeError, "bigquery failed"),
         ):
-            with self.assertRaisesRegex(RuntimeError, "bigquery failed"):
-                real_time.run()
+            real_time.run()
 
     def test_http_errors_are_sanitized_without_context(self):
         cases = [
@@ -104,20 +107,20 @@ class PipelineFailureTests(unittest.TestCase):
 
         for module, expected_message in cases:
             with self.subTest(module=module.__name__):
-                with mock.patch.object(
-                    module.requests,
-                    "get",
-                    side_effect=SecretHTTPError("api_token=SHOULD_NOT_APPEAR"),
+                with (
+                    mock.patch.object(
+                        module.requests,
+                        "get",
+                        side_effect=SecretHTTPError("api_token=SHOULD_NOT_APPEAR"),
+                    ),
+                    self.assertRaises(RuntimeError) as ctx,
                 ):
-                    with self.assertRaises(RuntimeError) as ctx:
-                        module.run()
+                    module.run()
 
                 exc = ctx.exception
                 self.assertEqual(str(exc), expected_message)
                 self.assertTrue(exc.__suppress_context__)
-                formatted = "".join(
-                    traceback.format_exception(type(exc), exc, exc.__traceback__)
-                )
+                formatted = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
                 self.assertNotIn("SHOULD_NOT_APPEAR", formatted)
 
     def test_real_time_pipeline_success_without_bigquery(self):
@@ -173,14 +176,17 @@ class PipelineFailureTests(unittest.TestCase):
         }
         stored_rows = []
 
-        with mock.patch.object(
-            eod.requests,
-            "get",
-            side_effect=[FakeResponse([shared_entry]), FakeResponse([shared_entry])],
-        ), mock.patch.object(
-            eod,
-            "store_data",
-            side_effect=lambda rows: stored_rows.extend(rows),
+        with (
+            mock.patch.object(
+                eod.requests,
+                "get",
+                side_effect=[FakeResponse([shared_entry]), FakeResponse([shared_entry])],
+            ),
+            mock.patch.object(
+                eod,
+                "store_data",
+                side_effect=lambda rows: stored_rows.extend(rows),
+            ),
         ):
             eod.run()
 
@@ -210,9 +216,11 @@ class PipelineFailureTests(unittest.TestCase):
                 return [{"message": "insert failed"}]
 
         fake_modules = install_fake_google_modules(FakeClient)
-        with mock.patch.dict(sys.modules, fake_modules, clear=False):
-            with self.assertRaisesRegex(RuntimeError, "Errors inserting real-time quotes"):
-                real_time.store_data([{"code": "AAPL.US", "close": 123.4}])
+        with (
+            mock.patch.dict(sys.modules, fake_modules, clear=False),
+            self.assertRaisesRegex(RuntimeError, "Errors inserting real-time quotes"),
+        ):
+            real_time.store_data([{"code": "AAPL.US", "close": 123.4}])
 
     def test_delayed_bigquery_client_creation_failure_propagates(self):
         os.environ["BIGQUERY_DATASET"] = "quantito"
@@ -221,11 +229,11 @@ class PipelineFailureTests(unittest.TestCase):
             raise RuntimeError("client init failed")
 
         fake_modules = install_fake_google_modules(failing_client)
-        with mock.patch.dict(sys.modules, fake_modules, clear=False):
-            with self.assertRaisesRegex(RuntimeError, "client init failed"):
-                delayed.store_data(
-                    [{"symbol": "AAPL.US", "exchange": "XNAS", "lastTradePrice": 123.4}]
-                )
+        with (
+            mock.patch.dict(sys.modules, fake_modules, clear=False),
+            self.assertRaisesRegex(RuntimeError, "client init failed"),
+        ):
+            delayed.store_data([{"symbol": "AAPL.US", "exchange": "XNAS", "lastTradePrice": 123.4}])
 
     def test_delayed_bigquery_import_error_propagates_when_configured(self):
         os.environ["BIGQUERY_DATASET"] = "quantito"
@@ -237,11 +245,11 @@ class PipelineFailureTests(unittest.TestCase):
                 raise ImportError("bigquery missing")
             return real_import(name, globals, locals, fromlist, level)
 
-        with mock.patch("builtins.__import__", side_effect=fake_import):
-            with self.assertRaisesRegex(ImportError, "bigquery missing"):
-                delayed.store_data(
-                    [{"symbol": "AAPL.US", "exchange": "XNAS", "lastTradePrice": 123.4}]
-                )
+        with (
+            mock.patch("builtins.__import__", side_effect=fake_import),
+            self.assertRaisesRegex(ImportError, "bigquery missing"),
+        ):
+            delayed.store_data([{"symbol": "AAPL.US", "exchange": "XNAS", "lastTradePrice": 123.4}])
 
     def test_real_time_dataset_creation_failure_propagates(self):
         os.environ["BIGQUERY_DATASET"] = "quantito"
@@ -260,9 +268,11 @@ class PipelineFailureTests(unittest.TestCase):
                 raise RuntimeError("dataset creation failed")
 
         fake_modules = install_fake_google_modules(FakeClient)
-        with mock.patch.dict(sys.modules, fake_modules, clear=False):
-            with self.assertRaisesRegex(RuntimeError, "dataset creation failed"):
-                real_time.store_data([{"code": "AAPL.US", "close": 123.4}])
+        with (
+            mock.patch.dict(sys.modules, fake_modules, clear=False),
+            self.assertRaisesRegex(RuntimeError, "dataset creation failed"),
+        ):
+            real_time.store_data([{"code": "AAPL.US", "close": 123.4}])
 
     def test_delayed_table_creation_failure_propagates(self):
         os.environ["BIGQUERY_DATASET"] = "quantito"
@@ -284,11 +294,11 @@ class PipelineFailureTests(unittest.TestCase):
                 raise RuntimeError("table creation failed")
 
         fake_modules = install_fake_google_modules(FakeClient)
-        with mock.patch.dict(sys.modules, fake_modules, clear=False):
-            with self.assertRaisesRegex(RuntimeError, "table creation failed"):
-                delayed.store_data(
-                    [{"symbol": "AAPL.US", "exchange": "XNAS", "lastTradePrice": 123.4}]
-                )
+        with (
+            mock.patch.dict(sys.modules, fake_modules, clear=False),
+            self.assertRaisesRegex(RuntimeError, "table creation failed"),
+        ):
+            delayed.store_data([{"symbol": "AAPL.US", "exchange": "XNAS", "lastTradePrice": 123.4}])
 
     def test_eod_chunk_insert_exception_propagates(self):
         os.environ["BIGQUERY_DATASET"] = "quantito"
@@ -310,19 +320,21 @@ class PipelineFailureTests(unittest.TestCase):
                 raise RuntimeError("chunk insert exploded")
 
         fake_modules = install_fake_google_modules(FakeClient)
-        with mock.patch.dict(sys.modules, fake_modules, clear=False):
-            with self.assertRaisesRegex(RuntimeError, "chunk insert exploded"):
-                eod.store_data(
-                    [
-                        {
-                            "symbol": "AAPL.US",
-                            "date": "2026-08-11",
-                            "open": 1.0,
-                            "high": 2.0,
-                            "low": 0.5,
-                            "close": 1.5,
-                            "adjusted_close": 1.4,
-                            "volume": 100,
-                        }
-                    ]
-                )
+        with (
+            mock.patch.dict(sys.modules, fake_modules, clear=False),
+            self.assertRaisesRegex(RuntimeError, "chunk insert exploded"),
+        ):
+            eod.store_data(
+                [
+                    {
+                        "symbol": "AAPL.US",
+                        "date": "2026-08-11",
+                        "open": 1.0,
+                        "high": 2.0,
+                        "low": 0.5,
+                        "close": 1.5,
+                        "adjusted_close": 1.4,
+                        "volume": 100,
+                    }
+                ]
+            )
