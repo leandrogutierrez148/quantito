@@ -94,18 +94,20 @@ To accurately reflect realistic trading environments, performance evaluation inc
 import numpy as np
 import pandas as pd
 
+
 def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
     """Calculates 12-period and 50-period EMAs and 14-period RSI."""
-    df['ema_fast'] = df['close'].ewm(span=12, adjust=False).mean()
-    df['ema_slow'] = df['close'].ewm(span=50, adjust=False).mean()
-    
-    delta = df['close'].diff()
+    df["ema_fast"] = df["close"].ewm(span=12, adjust=False).mean()
+    df["ema_slow"] = df["close"].ewm(span=50, adjust=False).mean()
+
+    delta = df["close"].diff()
     gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
     loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
-    
+
     rs = gain / (loss + 1e-9)
-    df['rsi'] = 100 - (100 / (1 + rs))
+    df["rsi"] = 100 - (100 / (1 + rs))
     return df
+
 
 def run_heuristic_strategy(df: pd.DataFrame):
     """Executes trading logic and maintains daily portfolio positions."""
@@ -114,20 +116,20 @@ def run_heuristic_strategy(df: pd.DataFrame):
     trades = []
     entry_price = 0.0
     entry_date = None
-    
+
     for i in range(len(df)):
         if i < 50:
             positions.append(0)
             continue
-            
-        current_close = df['close'].iloc[i]
-        curr_fast, curr_slow = df['ema_fast'].iloc[i], df['ema_slow'].iloc[i]
-        prev_fast, prev_slow = df['ema_fast'].iloc[i-1], df['ema_slow'].iloc[i-1]
-        current_rsi = df['rsi'].iloc[i]
-        
+
+        current_close = df["close"].iloc[i]
+        curr_fast, curr_slow = df["ema_fast"].iloc[i], df["ema_slow"].iloc[i]
+        prev_fast, prev_slow = df["ema_fast"].iloc[i - 1], df["ema_slow"].iloc[i - 1]
+        current_rsi = df["rsi"].iloc[i]
+
         crossed_above = (prev_fast <= prev_slow) and (curr_fast > curr_slow)
         crossed_below = (prev_fast >= prev_slow) and (curr_fast < curr_slow)
-        
+
         if position == 0:
             if crossed_above and (50 < current_rsi < 70):
                 position = 1
@@ -137,17 +139,19 @@ def run_heuristic_strategy(df: pd.DataFrame):
             if crossed_below or (current_rsi > 85):
                 position = 0
                 pct_return = (current_close - entry_price) / entry_price
-                trades.append({
-                    'entry_date': entry_date,
-                    'exit_date': df.index[i],
-                    'entry_price': entry_price,
-                    'exit_price': current_close,
-                    'return': pct_return
-                })
-                
+                trades.append(
+                    {
+                        "entry_date": entry_date,
+                        "exit_date": df.index[i],
+                        "entry_price": entry_price,
+                        "exit_price": current_close,
+                        "return": pct_return,
+                    }
+                )
+
         positions.append(position)
-        
-    df['position'] = positions
+
+    df["position"] = positions
     return df, trades
 ```
 
