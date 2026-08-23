@@ -8,10 +8,10 @@ This document details the infrastructure architecture, design decisions, and CI/
 
 The deployment of **Quantito** leverages the following Google Cloud services:
 
-*   **Google Cloud Run (Jobs):** Used to execute the container as a scheduled or on-demand run-to-completion task. The Python script performs data extraction and analysis and exits without needing a persistent web server process.
 *   **Artifact Registry:** A private Docker registry for storing compiled container images of the application.
-*   **Secret Manager:** Secure storage for sensitive credentials (such as `EODHD_API_TOKEN`), which are injected into the Cloud Run Job as environment variables during execution.
 *   **Cloud Build:** A continuous integration and delivery (CI/CD) service connected to the GitHub repository, automating container image builds and storage.
+*   **Google Cloud Run (Jobs):** Used to execute the container as a scheduled or on-demand run-to-completion task. The Python script performs data extraction and analysis and exits without needing a persistent web server process.
+*   **Secret Manager:** Secure storage for sensitive credentials (such as `EODHD_API_TOKEN`), which are injected into the Cloud Run Job as environment variables during execution.
 
 ### Deployment and Execution Flow Diagram
 
