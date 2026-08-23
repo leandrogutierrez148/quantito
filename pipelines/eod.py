@@ -1,17 +1,8 @@
 import datetime
-import json
 import logging
 import os
-import sys
 
 import requests
-
-# Configure logging to output to stdout
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[logging.StreamHandler(sys.stdout)],
-)
 
 logger = logging.getLogger(__name__)
 
@@ -42,13 +33,6 @@ def create_bq_table_if_not_exists(client, dataset_ref, table_id):
 
 
 def store_data(data):
-    # 1. Console Preview Sinker
-    print("\n--- ConsoleSinker Output Preview (eod) ---")
-    print(f"Sample (First 2 entries out of {len(data)}):")
-    print(json.dumps(data[:2], indent=2))
-    print("------------------------------------\n")
-
-    # 2. BigQuery Sinker
     bq_dataset = os.getenv("BIGQUERY_DATASET")
     if not bq_dataset:
         logger.info("BIGQUERY_DATASET is not configured. Skipping BigQuery storage.")
@@ -66,7 +50,7 @@ def store_data(data):
         dataset = bigquery.Dataset(dataset_ref)
         dataset.location = os.getenv("BIGQUERY_LOCATION", "US")
         client.create_dataset(dataset)
-        logging.info(f"Created BigQuery dataset: {bq_dataset}")
+        logger.info(f"Created BigQuery dataset: {bq_dataset}")
 
     create_bq_table_if_not_exists(client, dataset_ref, "eod_historical_data")
 
@@ -96,7 +80,7 @@ def store_data(data):
             raise RuntimeError(f"Errors inserting historical data chunk into BigQuery: {errors}")
         total_inserted += len(chunk)
 
-    logging.info(f"Inserted {total_inserted} EOD historical data rows into BigQuery.")
+    logger.info(f"Inserted {total_inserted} EOD historical data rows into BigQuery.")
 
 
 def run():
@@ -123,9 +107,6 @@ def run():
             symbol_data = response.json()
 
             if isinstance(symbol_data, list):
-                logger.info(
-                    f"Successfully retrieved {len(symbol_data)} EOD data points for {symbol}."
-                )
                 for entry in symbol_data:
                     if isinstance(entry, dict):
                         raw_data.append({**entry, "symbol": symbol})
@@ -133,7 +114,6 @@ def run():
         except Exception:
             raise RuntimeError(f"Error fetching EOD historical data for symbol {symbol}.") from None
 
-    # Processing step
     processed_data = []
     for entry in raw_data:
         symbol = entry.get("symbol")
@@ -143,20 +123,7 @@ def run():
             continue
         processed_data.append(entry)
 
-    # Sort by symbol, then date
     processed_data.sort(key=lambda x: (x["symbol"], x["date"]))
-
-    # Log basic statistics per symbol
-    symbol_counts = {}
-    for entry in processed_data:
-        sym = entry["symbol"]
-        symbol_counts[sym] = symbol_counts.get(sym, 0) + 1
-
-    logger.info(
-        f"Processed {len(processed_data)} total EOD entries across {len(symbol_counts)} symbols:"
-    )
-    for sym, count in symbol_counts.items():
-        logger.info(f"  - {sym}: {count} data points")
 
     if processed_data:
         store_data(processed_data)

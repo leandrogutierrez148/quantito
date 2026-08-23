@@ -1,6 +1,4 @@
-import contextlib
 import datetime
-import json
 import logging
 import os
 
@@ -38,13 +36,6 @@ def create_bq_table_if_not_exists(client, dataset_ref, table_id):
 
 
 def store_data(data):
-    # 1. Console Preview Sinker
-    print("\n--- ConsoleSinker Output Preview (real_time) ---")
-    print(f"Sample (First 2 entries out of {len(data)}):")
-    print(json.dumps(data[:2], indent=2))
-    print("------------------------------------\n")
-
-    # 2. BigQuery Sinker
     bq_dataset = os.getenv("BIGQUERY_DATASET")
     if not bq_dataset:
         logger.info("BIGQUERY_DATASET is not configured. Skipping BigQuery storage.")
@@ -116,9 +107,7 @@ def run():
     except Exception:
         raise RuntimeError("Error fetching real-time quotes.") from None
 
-    # Processing step
     processed_quotes = []
-    prices = []
     for quote in raw_quotes:
         if not isinstance(quote, dict):
             continue
@@ -129,16 +118,6 @@ def run():
             continue
 
         processed_quotes.append(quote)
-        with contextlib.suppress(ValueError, TypeError):
-            prices.append(float(close))
-
-    if prices:
-        avg_price = sum(prices) / len(prices)
-        logger.info(
-            f"Processed {len(processed_quotes)} valid quotes. Average price: {avg_price:.2f}"
-        )
-    else:
-        logger.info(f"Processed {len(processed_quotes)} valid quotes.")
 
     if processed_quotes:
         store_data(processed_quotes)

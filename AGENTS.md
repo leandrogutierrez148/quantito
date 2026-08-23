@@ -149,3 +149,16 @@ Before completing any task, run:
 # 4. Unit test suite execution
 PYTHONPATH=. .venv/bin/python -m unittest discover tests
 ```
+
+---
+
+## 5. Git Workflow & Branch Management
+
+All AI agents and developers must adhere to the mandatory branch and worktree policy before implementing changes:
+
+- **Dedicated Branching**: Always create a new branch or worktree for any requirement. Direct commits to `main` are strictly forbidden.
+- **Naming Pattern**: `<type>/<short-kebab-case-description>` (e.g., `fix/dockerfile-with-pyproject`, `feat/rsi-indicator`, `chore/cleanup-logs`).
+- **Commit Messages**: Plain, concise descriptions without `<type>(scope):` prefixes.
+- **Full Specification**: Detailed rule definition is located in [`.agents/rules/git-workflow.md`](file:///.agents/rules/git-workflow.md).
+
+

@@ -1,5 +1,4 @@
 import datetime
-import json
 import logging
 import os
 
@@ -34,13 +33,6 @@ def create_bq_table_if_not_exists(client, dataset_ref, table_id):
 
 
 def store_data(data):
-    # 1. Console Preview Sinker
-    print("\n--- ConsoleSinker Output Preview (delayed) ---")
-    print(f"Sample (First 2 entries out of {len(data)}):")
-    print(json.dumps(data[:2], indent=2))
-    print("------------------------------------\n")
-
-    # 2. BigQuery Sinker
     bq_dataset = os.getenv("BIGQUERY_DATASET")
     if not bq_dataset:
         logger.info("BIGQUERY_DATASET is not configured. Skipping BigQuery storage.")
@@ -117,11 +109,7 @@ def run():
     except Exception:
         raise RuntimeError("Error fetching US delayed quotes.") from None
 
-    # Processing step
     processed_quotes = []
-    above_50_day_avg_count = 0
-    total_valid = 0
-
     for quote in raw_quotes:
         if not isinstance(quote, dict):
             continue
@@ -132,21 +120,6 @@ def run():
             continue
 
         processed_quotes.append(quote)
-        total_valid += 1
-
-        fifty_day_avg = quote.get("fiftyDayAveragePrice")
-        if fifty_day_avg is not None:
-            try:
-                if float(last_trade) > float(fifty_day_avg):
-                    above_50_day_avg_count += 1
-            except (ValueError, TypeError):
-                pass
-
-    logger.info(f"Processed {total_valid} valid delayed quotes.")
-    if total_valid > 0:
-        logger.info(
-            f"Stocks trading above their 50-day average: {above_50_day_avg_count}/{total_valid}"
-        )
 
     if processed_quotes:
         store_data(processed_quotes)
