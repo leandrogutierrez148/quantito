@@ -30,19 +30,22 @@ class DockerArtifactTests(unittest.TestCase):
         dockerfile = (REPO_ROOT / "Dockerfile").read_text()
 
         self.assertNotIn("COPY . .", dockerfile)
+        self.assertIn("COPY pyproject.toml README.md ./", dockerfile)
         self.assertIn("COPY main.py ./main.py", dockerfile)
         self.assertIn("COPY pipelines ./pipelines", dockerfile)
+        self.assertIn("COPY engine ./engine", dockerfile)
         self.assertNotIn("COPY utils", dockerfile)
         self.assertNotIn("eodhd-api.httpbook", dockerfile)
 
     def test_dockerignore_is_runtime_allowlist(self):
         rules = (REPO_ROOT / ".dockerignore").read_text().splitlines()
 
-        self.assertFalse(dockerignore_includes("README.md", rules))
+        self.assertTrue(dockerignore_includes("README.md", rules))
+        self.assertTrue(dockerignore_includes("pyproject.toml", rules))
         self.assertFalse(dockerignore_includes("utils/eodhd-api.httpbook", rules))
         self.assertFalse(dockerignore_includes(".git/config", rules))
         self.assertTrue(dockerignore_includes("main.py", rules))
-        self.assertTrue(dockerignore_includes("requirements.txt", rules))
+        self.assertTrue(dockerignore_includes("engine/models.py", rules))
         self.assertTrue(dockerignore_includes("pipelines/real_time.py", rules))
 
     def test_import_container_smoke_script_exists(self):
@@ -50,7 +53,9 @@ class DockerArtifactTests(unittest.TestCase):
         self.assertTrue(script_path.exists())
         script_contents = script_path.read_text()
         self.assertIn("docker build -t", script_contents)
-        self.assertIn("import main, pipelines.real_time, pipelines.delayed, pipelines.eod", script_contents)
+        self.assertIn(
+            "import main, pipelines.real_time, pipelines.delayed, pipelines.eod", script_contents
+        )
         self.assertNotIn("main.main(pipelines_env='')", script_contents)
 
     def test_import_container_smoke_script(self):

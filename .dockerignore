@@ -1,6 +1,9 @@
 *
 !Dockerfile
-!requirements.txt
+!pyproject.toml
+!README.md
 !main.py
 !pipelines/
 !pipelines/**
+!engine/
+!engine/**
