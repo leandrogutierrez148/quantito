@@ -37,23 +37,21 @@ def main(pipelines_env=None, importer=importlib.import_module):
         pipelines_env = os.getenv("PIPELINES", "real_time,delayed,eod")
     pipelines_to_run = parse_pipelines(pipelines_env)
 
-    logging.info(f"Main orchestrator starting execution. Pipelines selected: {pipelines_to_run}")
+    logger.info(f"Main orchestrator starting execution. Pipelines selected: {pipelines_to_run}")
     failures = []
 
     if not pipelines_to_run:
-        logging.error("No pipelines selected.")
+        logger.error("No pipelines selected.")
         return 1
 
     for p_name in pipelines_to_run:
-        logging.info(f"==========================================")
-        logging.info(f"Executing Pipeline: {p_name.upper()}")
-        logging.info(f"==========================================")
+        logger.info(f"Executing Pipeline: {p_name.upper()}")
 
         try:
             module = load_pipeline_module(p_name, importer=importer)
             module.run()
         except Exception as exc:
-            logging.error(
+            logger.error(
                 "Pipeline %s execution failed with %s.",
                 p_name,
                 exc.__class__.__name__,
