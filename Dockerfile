@@ -1,5 +1,5 @@
 # Use an official lightweight Python image.
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 # Set environment variables to optimize Python for containers
 ENV PYTHONUNBUFFERED=1 \
@@ -8,9 +8,9 @@ ENV PYTHONUNBUFFERED=1 \
 # Set the working directory in the container
 WORKDIR /app
 
-# Install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Install dependencies from pyproject.toml (cached layer)
+COPY pyproject.toml README.md ./
+RUN pip install --no-cache-dir .
 
 # Copy only the runtime code required by the job.
 COPY main.py ./main.py

@@ -20,7 +20,10 @@ To run the script directly with Python on your local machine:
 # Create virtual environment and install dependencies
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -e .
+
+# (Optional) Install development dependencies (Ruff linter/formatter)
+pip install -e ".[dev]"
 
 # Configure environment variables and run (runs all default pipelines)
 export EODHD_API_TOKEN="6a481010857769.46199511"
@@ -34,7 +37,7 @@ python main.py
 
 ### Docker Execution
 
-The project features a secure, optimized `Dockerfile` based on `python:3.11-slim` that runs processes with an unprivileged user.
+The project features a secure, optimized `Dockerfile` based on `python:3.12-slim` that runs processes with an unprivileged user.
 
 ```bash
 # Build the image
