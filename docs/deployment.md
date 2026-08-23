@@ -112,3 +112,64 @@ tags:
   - quantito-git
 ```
 
+---
+
+## 3. Cloud Run Job Definition (`quantito-git`)
+
+The batch/task execution of Quantito is managed via a Google Cloud Run Job named `quantito-git`.
+
+### Key Configuration Highlights
+
+*   **Container Image:** Pulls the `:latest` image built by Cloud Build from Artifact Registry (`europe-west1-docker.pkg.dev/quantito/cloud-run-source-deploy/leandrogutierrez148-quantito/quantito-git:latest`).
+*   **Environment Variables & Secret Manager Integration:**
+    *   `BIGQUERY_DATASET`: Sets the destination dataset in BigQuery (e.g., `quantito_test`).
+    *   `EODHD_API_TOKEN`: Injected securely directly from Secret Manager via `secretKeyRef` pointing to secret `eodhd-api_key` (version `1`).
+*   **Resource Allocation:** Configured with `1000m` (1 vCPU) and `512Mi` RAM, providing lightweight and cost-effective execution.
+
+### Cloud Run Job YAML Specification
+
+```yaml
+apiVersion: run.googleapis.com/v1
+kind: Job
+metadata:
+  name: quantito-git
+  namespace: '393621976174'
+  labels:
+    cloud.googleapis.com/location: europe-west1
+    run.googleapis.com/lastUpdatedTime: '2026-07-25T09:08:32.377332Z'
+  annotations:
+    run.googleapis.com/creator: leandrogutierrez148@gmail.com
+    run.googleapis.com/lastModifier: leandrogutierrez148@gmail.com
+    run.googleapis.com/client-name: cloud-console
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/client-name: cloud-console
+        run.googleapis.com/execution-environment: gen2
+    spec:
+      taskCount: 1
+      template:
+        spec:
+          containers:
+          - name: quantito-git-1
+            image: europe-west1-docker.pkg.dev/quantito/cloud-run-source-deploy/leandrogutierrez148-quantito/quantito-git:latest
+            env:
+            - name: BIGQUERY_DATASET
+              value: quantito_test
+            - name: EODHD_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: '1'
+                  name: eodhd-api_key
+            resources:
+              limits:
+                cpu: 1000m
+                memory: 512Mi
+          maxRetries: 3
+          timeoutSeconds: 600
+          serviceAccountName: 393621976174-compute@developer.gserviceaccount.com
+      delayExecution: false
+```
+
+
