@@ -1,5 +1,6 @@
 from engine.core import SignalEngine
 from engine.models import Signal, SignalType
+from engine.server import app, run_server
 from engine.sinks.base import BaseSignalSink
 from engine.sinks.bigquery import BigQuerySignalSink
 from engine.sinks.console import ConsoleSignalSink
@@ -15,4 +16,6 @@ __all__ = [
     "SignalEngine",
     "SignalType",
     "StrategyRegistry",
+    "app",
+    "run_server",
 ]

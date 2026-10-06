@@ -1,17 +1,20 @@
 [project]
 name = "quantito"
 version = "0.1.0"
-description = "Algorithmic Trading & Financial Market Ingestion Engine"
+description = "Quantitative Strategy Execution Engine and Signal Service"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "requests>=2.31.0",
     "google-cloud-bigquery>=3.0.0",
+    "fastapi>=0.115.0",
+    "uvicorn>=0.30.0",
+    "pydantic>=2.0.0",
 ]
 
 [project.optional-dependencies]
 dev = [
     "ruff>=0.16.0",
+    "httpx>=0.27.0",
 ]
 
 [tool.ruff]
@@ -42,7 +45,7 @@ ignore = [
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
-known-first-party = ["engine", "pipelines"]
+known-first-party = ["engine"]
 
 [tool.ruff.lint.per-file-ignores]
 "notebooks/*" = ["SIM102", "RUF059", "E402", "F841"]

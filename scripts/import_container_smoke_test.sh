@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
-
 set -euo pipefail
 
-IMAGE_TAG="${1:-quantito-import-smoke}"
+IMAGE_TAG="${1:-quantito:smoke-test}"
 
+echo "Building smoke test image: ${IMAGE_TAG}"
 docker build -t "${IMAGE_TAG}" .
-docker run --rm --entrypoint python "${IMAGE_TAG}" -c "import main, pipelines.real_time, pipelines.delayed, pipelines.eod; print('import-container-smoke-ok')"
+
+echo "Running import container smoke test..."
+docker run --rm --entrypoint python "${IMAGE_TAG}" -c "import main, engine, engine.server; print('import-container-smoke-ok')"
+
+echo "Smoke test passed successfully."

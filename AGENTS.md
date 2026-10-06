@@ -6,16 +6,17 @@ This file serves as the central reference for AI agents and developers working o
 
 ## 1. General Project Architecture
 
-Quantito is a Python (3.12+) platform for financial market data ingestion, processing, quantitative analysis, and signal generation.
+Quantito is a Python (3.12+) quantitative analysis, signal generation, and strategy execution engine.
 
 ### Directory Structure
 
 ```
 quantito/
 ├── engine/                      # Central signal generation and dispatching engine
-│   ├── __init__.py              # Exports clean public API (SignalEngine, Signal, etc.)
+│   ├── __init__.py              # Exports clean public API (SignalEngine, Signal, app, etc.)
 │   ├── models.py                # Data models: Signal (dataclass), SignalType (StrEnum)
 │   ├── core.py                  # SignalEngine orchestrator (Strategy pattern, hot-swapping)
+│   ├── server.py                # FastAPI HTTP server for strategy evaluation
 │   ├── strategies/              # Quantitative strategies
 │   │   ├── __init__.py          # Auto-registration of available strategies
 │   │   ├── base.py              # Abstract BaseStrategy class
@@ -27,15 +28,13 @@ quantito/
 │       ├── base.py              # Abstract BaseSignalSink class
 │       ├── console.py           # Formatted console output
 │       └── bigquery.py          # Google Cloud BigQuery persistence
-├── pipelines/                   # Ingestion pipelines using EODHD API
-│   ├── real_time.py             # Real-time quotes
-│   ├── delayed.py               # 15-minute delayed quotes (US quotes)
-│   └── eod.py                   # End-of-Day historical data
 ├── notebooks/                   # Jupyter Notebooks for analysis and backtesting
 ├── tests/                       # Unit test suite (unittest)
-├── main.py                      # CLI/Docker entry point and orchestrator
+├── main.py                      # CLI/Docker entry point (Strategy Server launcher)
 └── pyproject.toml               # Project configuration, dependencies, and Ruff rules
 ```
+
+> **Ingestion Pipelines**: Data collection pipelines and scrapers have been separated into [`quantito-pipe`](file:///Users/lgutierrez/Proyectos/quantito-pipe).
 
 ---
 
@@ -46,8 +45,8 @@ All new or modified code must pass **Ruff** validation without warnings or error
 ### 2.1. Import Management (`isort` / `I001`)
 - Import blocks must be sorted alphabetically and organized into three groups separated by a single blank line:
   1. Python standard library (`datetime`, `json`, `logging`, `os`, `sys`, etc.).
-  2. Third-party libraries (`requests`, `google.cloud.bigquery`, etc.).
-  3. Local project modules (`engine`, `pipelines`).
+  2. Third-party libraries (`fastapi`, `uvicorn`, `pydantic`, `google.cloud.bigquery`, etc.).
+  3. Local project modules (`engine`).
 - Imported members (`from typing import Any, ClassVar`) must be sorted alphabetically.
 
 ### 2.2. Static Typing (Python 3.12 Generics & Built-ins)
@@ -160,5 +159,3 @@ All AI agents and developers must adhere to the mandatory branch and worktree po
 - **Naming Pattern**: `<type>/<short-kebab-case-description>` (e.g., `fix/dockerfile-with-pyproject`, `feat/rsi-indicator`, `chore/cleanup-logs`).
 - **Commit Messages**: Plain, concise descriptions without `<type>(scope):` prefixes.
 - **Full Specification**: Detailed rule definition is located in [`.agents/rules/git-workflow.md`](file:///.agents/rules/git-workflow.md).
-
-
