@@ -1,59 +1,58 @@
-# Quantito
+# Quantito Strategy Engine
 
-**Quantito** is a serverless project for retrieving, processing, and analyzing financial data.
+**Quantito** is a Python quantitative analysis, signal generation, and strategy execution engine. It provides a modular Strategy & Sink architecture as well as a FastAPI HTTP server for dynamic strategy evaluation and real-time trade signals.
 
-### Configuration (Environment Variables)
+> **Note**: Data ingestion pipelines and scrapers have been decoupled and moved to the dedicated repository [`quantito-pipe`](file:///Users/lgutierrez/Proyectos/quantito-pipe).
 
-The pipeline is configured using environment variables:
+---
 
-| Variable | Description | Default Value |
-| :--- | :--- | :--- |
-| `EODHD_API_TOKEN` | Access token for the EODHD API (Required) | *None* |
-| `SYMBOLS` | Comma-separated list of tickers to query | `AAPL.US,GOOGL.US` |
-| `PIPELINES` | Comma-separated pipelines to run (`real_time`, `delayed`, `eod`) | `real_time,delayed,eod` |
+## Features
 
-### Local Execution
+- **Strategy Engine (`engine`)**: Extensible registry pattern (`StrategyRegistry`) supporting pluggable quantitative strategies (e.g. 50-Day Moving Average, Price Momentum, RSI, etc.).
+- **Signal Dispatchers (`sinks`)**: Modular destinations for generated signals (Console, Google Cloud BigQuery, Webhooks).
+- **FastAPI HTTP Execution API**: REST endpoints for dynamic strategy discovery and on-demand signal evaluation.
+- **Strict Typing & Linting**: Built on Python 3.12+ with native typing, full Ruff linting compliance, and 100% unit test coverage.
 
-To run the script directly with Python on your local machine:
+---
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/health` / `/api/v1/health` | Healthcheck and UTC timestamp |
+| `GET` | `/api/v1/strategies` | List registered quantitative strategies |
+| `POST` | `/api/v1/strategies/{name}/evaluate` | Evaluate market data with a named strategy |
+
+---
+
+## Local Development & Execution
 
 ```bash
 # Create virtual environment and install dependencies
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -e .
-
-# (Optional) Install development dependencies (Ruff linter/formatter)
 pip install -e ".[dev]"
 
-# Configure environment variables and run (runs all default pipelines)
-export EODHD_API_TOKEN="6a481010857769.46199511"
-export SYMBOLS="AAPL.US,GOOGL.US"
-python main.py
+# Run Ruff linter and formatter checks
+ruff check . && ruff format --check .
 
-# Example: Run ONLY the real-time pipeline
-export PIPELINES="real_time"
-python main.py
+# Run unit tests
+PYTHONPATH=. python -m unittest discover tests
+
+# Start the Strategy Execution Server
+python main.py --host 0.0.0.0 --port 8080
 ```
 
-### Docker Execution
+---
 
-The project features a secure, optimized `Dockerfile` based on `python:3.12-slim` that runs processes with an unprivileged user.
+## Docker Execution
+
+The project provides an optimized, unprivileged `Dockerfile` based on `python:3.12-slim`:
 
 ```bash
 # Build the image
-docker build -t quantito-job .
+docker build -t quantito-engine:latest .
 
-# Run the container (runs all default pipelines)
-docker run --env EODHD_API_TOKEN="your-token-here" quantito-job
-
-# Example: Run ONLY the real-time pipeline in Docker
-docker run \
-  --env EODHD_API_TOKEN="your-token-here" \
-  --env PIPELINES="real_time" \
-  quantito-job
+# Run the container
+docker run -p 8080:8080 quantito-engine:latest
 ```
-
-### Documentation & Deployment
-
-*   **API Documentation:** For detailed information on the external API provider integration, query structures, response definitions, and query parameters, see [EODHD_API.md](file:///Users/lgutierrez/Proyectos/quantito/EODHD_API.md).
-*   **Deployment:** For detailed information on the deployment architecture, configuration decisions, and the CI/CD pipeline on Google Cloud Platform (GCP), see [DEPLOYMENT.md](file:///Users/lgutierrez/Proyectos/quantito/DEPLOYMENT.md).
