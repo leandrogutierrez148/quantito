@@ -6,31 +6,33 @@ This file serves as the central reference for AI agents and developers working o
 
 ## 1. General Project Architecture
 
-Quantito is a Python (3.12+) quantitative analysis, signal generation, and strategy execution engine.
+Quantito is the quantitative strategy evaluation and signal generation microservice within the **Quantito Financial Platform**. Built with Python 3.12+ and FastAPI, it evaluates market data with quantitative algorithms and emits standardized trading signals via REST API.
+
+### Ecosystem Overview
+1. **`quantito-pipe`**: Ingests market quotes (EOD, Delayed, Real-time) from EODHD into Google Cloud BigQuery.
+2. **`quantito`** *(this repository)*: Pure, stateless quantitative strategy computation service (`src/quantito`).
+3. **`quantito-engine`**: Orchestrator (Go / Echo / MySQL) managing experiments, concurrency locks, signal ledgers, and dispatching.
 
 ### Directory Structure
 
 ```
 quantito/
 ├── src/
-│   └── quantito/                # Central signal generation and evaluation package
-│       ├── __init__.py          # Exports clean public API (SignalEngine, Signal, app, etc.)
+│   └── quantito/                # Core quantitative package (PEP 518/621 src-layout)
+│       ├── __init__.py          # Exports public API (Signal, SignalType, BaseStrategy, StrategyRegistry)
+│       ├── api.py               # FastAPI application, routes, and Pydantic schemas
+│       ├── core.py              # SignalEngine orchestrator (Strategy pattern)
 │       ├── models.py            # Data models: Signal (dataclass), SignalType (StrEnum)
-│       ├── core.py              # SignalEngine orchestrator (Strategy pattern, hot-swapping)
-│       ├── server.py            # FastAPI HTTP server for strategy evaluation
-│       └── strategies/          # Quantitative strategies
+│       └── strategies/          # Quantitative strategy implementations
 │           ├── __init__.py      # Auto-registration of available strategies
 │           ├── base.py          # Abstract BaseStrategy class
 │           ├── registry.py      # StrategyRegistry (decorator & dynamic factory)
 │           ├── fifty_day_avg.py # 50-day moving average strategy
 │           └── price_momentum.py# Price momentum / percentage change strategy
-├── notebooks/                   # Jupyter Notebooks for analysis and backtesting
 ├── tests/                       # Unit test suite (unittest)
-├── main.py                      # CLI/Docker entry point (Strategy Server launcher)
+├── main.py                      # CLI entrypoint and Uvicorn server launcher
 └── pyproject.toml               # Project configuration, dependencies, and Ruff rules
 ```
-
-> **Architecture Separation**: Signal sinks, persistence, and dispatching are managed by [`quantito-engine`](file:///Users/lgutierrez/Proyectos/quantito-engine). Data ingestion pipelines are managed by [`quantito-pipe`](file:///Users/lgutierrez/Proyectos/quantito-pipe).
 
 ---
 
@@ -41,7 +43,7 @@ All new or modified code must pass **Ruff** validation without warnings or error
 ### 2.1. Import Management (`isort` / `I001`)
 - Import blocks must be sorted alphabetically and organized into three groups separated by a single blank line:
   1. Python standard library (`datetime`, `json`, `logging`, `os`, `sys`, etc.).
-  2. Third-party libraries (`fastapi`, `uvicorn`, `pydantic`, `google.cloud.bigquery`, etc.).
+  2. Third-party libraries (`fastapi`, `pydantic`, `uvicorn`, etc.).
   3. Local project modules (`quantito`).
 - Imported members (`from typing import Any, ClassVar`) must be sorted alphabetically.
 
@@ -87,22 +89,22 @@ All new or modified code must pass **Ruff** validation without warnings or error
 
 ---
 
-## 3. Engine Extension Patterns (`engine`)
+## 3. Engine Extension Patterns (`quantito.strategies`)
 
 ### 3.1. How to Add a New Strategy
-1. Create the file in `engine/strategies/<strategy_name>.py`.
+1. Create the file in `src/quantito/strategies/<strategy_name>.py`.
 2. Inherit from `BaseStrategy` and implement `name` and `generate_signals(market_data: list[dict[str, Any]]) -> list[Signal]`.
 3. Decorate the class with `@StrategyRegistry.register("<strategy_name>")`.
-4. Import and expose the strategy in `engine/strategies/__init__.py`.
+4. Import and expose the strategy in `src/quantito/strategies/__init__.py`.
 
 Example:
 ```python
 import datetime
 from typing import Any
 
-from engine.models import Signal, SignalType
-from engine.strategies.base import BaseStrategy
-from engine.strategies.registry import StrategyRegistry
+from quantito.models import Signal, SignalType
+from quantito.strategies.base import BaseStrategy
+from quantito.strategies.registry import StrategyRegistry
 
 
 @StrategyRegistry.register("rsi_crossover")
@@ -137,7 +139,7 @@ Before completing any task, run:
 .venv/bin/ruff check . && .venv/bin/ruff format --check .
 
 # 4. Unit test suite execution
-PYTHONPATH=. .venv/bin/python -m unittest discover tests
+.venv/bin/python -m unittest discover tests
 ```
 
 ---
@@ -146,7 +148,7 @@ PYTHONPATH=. .venv/bin/python -m unittest discover tests
 
 All AI agents and developers must adhere to the mandatory branch and worktree policy before implementing changes:
 
-- **Dedicated Branching**: Always create a new branch or worktree for any requirement. Direct commits to `main` are strictly forbidden.
-- **Naming Pattern**: `<type>/<short-kebab-case-description>` (e.g., `fix/dockerfile-with-pyproject`, `feat/rsi-indicator`, `chore/cleanup-logs`).
+- **Dedicated Branching**: Always create a new branch or worktree for any requirement. Direct commits to `main` or `master` are strictly forbidden.
+- **Naming Pattern**: `<type>/<short-kebab-case-description>` (e.g., `fix/dockerfile-with-pyproject`, `feat/rsi-indicator`, `docs/update-architecture`).
 - **Commit Messages**: Plain, concise descriptions without `<type>(scope):` prefixes.
 - **Full Specification**: Detailed rule definition is located in [`.agents/rules/git-workflow.md`](file:///.agents/rules/git-workflow.md).
