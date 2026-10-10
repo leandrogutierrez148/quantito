@@ -1,3 +1,4 @@
+import os
 import pathlib
 import shutil
 import subprocess
@@ -56,6 +57,8 @@ class DockerArtifactTests(unittest.TestCase):
         self.assertIn("import main, quantito, quantito.server", script_contents)
 
     def test_import_container_smoke_script(self):
+        if os.environ.get("QUANTITO_OFFLINE_TESTS") == "1":
+            self.skipTest("Docker build requires network; excluded from offline suite")
         if not shutil.which("docker"):
             self.skipTest("docker CLI is not installed")
 

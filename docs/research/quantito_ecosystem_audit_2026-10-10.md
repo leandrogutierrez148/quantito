@@ -52,7 +52,7 @@ No se escribió comentario o review remoto.
 | engine origin/main recién checkout | No puede testear: mocks ignorados faltantes; .mockery.yaml usa pkgname incompatible con Mockery v2.53.7 |
 | engine audit preparado con config PR1 temporal | Mockery v2.53.7 genera mocks compatibles; make unit-tests OK, 10 paquetes |
 | engine audit go test ./... fuera de sandbox | Unit tests OK; cuatro integration tests fallan por tests/integration/configs/config.toml ausente |
-| POC quantito | pytest: 53 passed, 1 skipped, 25 subtests; unittest: 54 tests OK, 1 skipped; Ruff check/format y diff --check OK |
+| POC quantito, tras corrección de review | pytest: 62 passed, 1 skipped, 29 subtests; unittest: 63 tests OK, 1 skipped; Ruff check/format y diff --check OK |
 
 Se usa Go /opt/homebrew/bin/go, go1.27.1 darwin/arm64. Config temporal de Mockery:
 `git show fix/mockery-generation:.mockery.yaml > /tmp/quantito-engine-audit-mockery.yaml`.
@@ -63,6 +63,11 @@ sus helpers borran tablas. No se ejecutaron contra un servidor real ni se
 leyeron credenciales. Un error inicial de httptest por sandbox se resolvió al
 repetir fuera del sandbox; el bloqueo restante es configuración de integración.
 Docker smoke tests Python fueron skipped, no presentados como aprobados.
+La revisión del Draft PR añadió CI Python 3.12 offline, dos modos explícitos de
+label diario, cleanup de caches y recuperación de ZIPs corruptos. Las métricas
+diarias actuales y el cambio contra el resultado anterior se documentan en el
+reporte de resultados. `execution_aligned` es principal; la emulación del label
+original queda sólo como comparación. No se solicitaron reviewers.
 
 ## Diff portfolio Phase 1 y revisión
 

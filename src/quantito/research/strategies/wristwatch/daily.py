@@ -1,8 +1,10 @@
 """Daily cross-asset adaptation with a common pooled model and frozen config."""
 
 import hashlib
+import json
 import tempfile
 import zipfile
+from dataclasses import asdict
 from pathlib import Path
 
 import numpy as np
@@ -46,15 +48,59 @@ def daily_target(index, scores, config):
     return result
 
 
-def run_daily(dataset, output, config, *, years=range(2013, 2018)):
+LABEL_MODES = ("execution_aligned", "source_label_emulation")
+
+
+def daily_labels(bars, config, label_mode="execution_aligned"):
+    """Outcome and observable exit for each decision, measured in trading bars."""
+    if label_mode not in LABEL_MODES:
+        raise ValueError(f"Unknown daily label mode: {label_mode}")
+    delay = config.daily_delay_bars if label_mode == "execution_aligned" else 0
+    exit_offset = delay + config.hold_bars
+    timestamps = bars.index.to_series()
+    return pd.DataFrame(
+        {
+            "label_entry": timestamps.shift(-delay),
+            "label_exit": timestamps.shift(-exit_offset),
+            "outcome_bps": np.log(bars.open.shift(-exit_offset) / bars.open.shift(-delay)) * 1e4,
+        },
+        index=bars.index,
+    )
+
+
+def annual_training_rows(features, cutoff):
+    """Labels ending at or after the annual cutoff are not known at refit."""
+    return features.loc[
+        features.aligned
+        & (features.label_exit < cutoff)
+        & features[[*FEATURES, "outcome_bps"]].notna().all(axis=1)
+    ]
+
+
+def run_daily(dataset, output, config, *, years=range(2013, 2018), label_mode="execution_aligned"):
+    if label_mode not in LABEL_MODES:
+        raise ValueError(f"Unknown daily label mode: {label_mode}")
+    with tempfile.TemporaryDirectory(prefix="quantito-wristwatch-daily-") as directory:
+        return _run_daily(dataset, output, config, Path(directory), years, label_mode)
+
+
+def _run_daily(dataset, output, config, cache, years, label_mode):
     out = Path(output)
-    cache = Path(tempfile.mkdtemp(prefix="quantito-wristwatch-daily-"))
-    cache.mkdir(parents=True, exist_ok=True)
-    write_json(out / "leandro_parameter_mapping.json", MAPPING)
+    years = tuple(years)
+    mapping = {
+        **MAPPING,
+        "label_mode": label_mode,
+        "label": "t+delay -> t+delay+hold" if label_mode == "execution_aligned" else "t -> t+hold",
+        "label_role": "principal" if label_mode == "execution_aligned" else "comparison only",
+        "execution": "t+delay -> t+delay+hold in BOTH modes",
+    }
+    write_json(out / "leandro_parameter_mapping.json", mapping)
+    effective = {"config": asdict(config), "years": list(years), **mapping}
+    config_hash = hashlib.sha256(json.dumps(effective, sort_keys=True).encode()).hexdigest()
     # Save BEFORE looking at returns or fitting any model.
     write_json(
         out / "daily_frozen_config.json",
-        {"config_hash": config.digest, "years": list(years), **MAPPING},
+        {"config_hash": config_hash, **effective},
     )
     train_parts = {year: [] for year in years}
     gates = {year: [] for year in years}
@@ -71,21 +117,15 @@ def run_daily(dataset, output, config, *, years=range(2013, 2018)):
                 features = daily_features(bars)
                 # Preserve chronology and valid future TRAINING labels only. Evaluation uses features alone.
                 h = config.hold_bars
-                outcomes = np.log(bars.open.shift(-h) / bars.open) * 1e4
-                exits = bars.index.to_series().shift(-h)
-                features["outcome_bps"] = outcomes
-                features["label_exit"] = exits
+                labels = daily_labels(bars, config, label_mode)
+                features = features.join(labels)
                 features["open"] = bars.open
                 features["aligned"] = np.arange(len(bars)) % h == 0
                 features.to_parquet(cache / f"{symbol}.parquet")
                 eligible.append(symbol)
                 for year in years:
                     cutoff = pd.Timestamp(f"{year}-01-01", tz="UTC")
-                    train = features.loc[
-                        features.aligned
-                        & (features.label_exit < cutoff)
-                        & features[[*FEATURES, "outcome_bps"]].notna().all(axis=1)
-                    ]
+                    train = annual_training_rows(features, cutoff)
                     if len(train) < 50:
                         continue
                     # Symbol-stable sample, chosen without inspecting realized metrics.
@@ -226,6 +266,9 @@ def run_daily(dataset, output, config, *, years=range(2013, 2018)):
     ).to_csv(out / "leandro_group_summary.csv")
     absolute = returns.abs().sort_values(ascending=False)
     summary = {
+        "label_mode": label_mode,
+        "config_hash": config_hash,
+        "result_role": mapping["label_role"],
         "evaluated_symbols": len(complete),
         "no_evaluation": int(frame.status.ne("COMPLETE").sum()),
         "rejected": len(rejected),
@@ -235,6 +278,12 @@ def run_daily(dataset, output, config, *, years=range(2013, 2018)):
         "equal_weight_net_log_pct": float(combined.strategy_equal_weight_bps.sum() / 100),
         "buy_hold_equal_weight_net_log_pct": float(combined.buy_hold_equal_weight_bps.sum() / 100),
         "top_10_absolute_pnl_share": float(absolute.head(10).sum() / absolute.sum()),
+        "cost_sensitivity_mean_log_pct": {
+            str(cost): float(complete[f"net_{cost}bp_log_pct"].mean()) for cost in (0, 5, 10, 20)
+        },
+        "mean_long_net_log_pct": float(complete.long_net_log_pct.mean()),
+        "mean_short_net_log_pct": float(complete.short_net_log_pct.mean()),
+        "mean_abs_exposure": float(complete.mean_abs_exposure.mean()),
         "best_descriptive_only": complete.nlargest(5, "net_additive_log_pct")[
             ["symbol", "net_additive_log_pct"]
         ].to_dict("records"),

@@ -107,7 +107,13 @@ export MPLCONFIGDIR=/tmp/quantito-matplotlib
   --panel-dir /path/to/btc_causal_1m_features_postcut_2024_2025 \
   --reference-dir /path/to/wristwatch_1m_research_20260922/output
 .venv/bin/python -m quantito.research.strategies.wristwatch \
-  --experiment daily-cross-asset --dataset ~/Downloads/archive.zip
+  --experiment daily-cross-asset --dataset ~/Downloads/archive.zip \
+  --daily-label-mode execution_aligned \
+  --output artifacts/wristwatch/daily_revision/execution_aligned
+.venv/bin/python -m quantito.research.strategies.wristwatch \
+  --experiment daily-cross-asset --dataset ~/Downloads/archive.zip \
+  --daily-label-mode source_label_emulation \
+  --output artifacts/wristwatch/daily_revision/source_label_emulation
 .venv/bin/python -m pytest -q
 .venv/bin/python -m unittest discover tests
 .venv/bin/ruff check .
@@ -125,10 +131,31 @@ certification. Official recent BTC data is rebuilt without these external panels
 Results go to ignored `artifacts/wristwatch/`: config, data hashes, scores, fits,
 metrics, trades, minute equity/drawdown parquet, daily CSV, attribution CSV, JSON,
 Markdown and PNG plots. Data ZIPs and daily feature caches stay outside Git.
+The daily feature cache is owned by `TemporaryDirectory`: it is removed when the
+run returns or raises, including failures after parquet files have been written.
+Successful and exceptional cleanup are checked using synthetic datasets.
+`execution_aligned` is the daily default/principal label t+1→t+5;
+`source_label_emulation` is comparison-only t→t+4. Execution remains t+1→t+5
+in both modes, and annual training excludes the actual label exit at/after cutoff.
+Use separate output paths as above to retain both modes and config hashes.
 The default sensitivity matrix covers costs 0/5/10 bps and delay 0/1/2/5 minutes;
 CLI target/cost/delay overrides permit declared reruns. Other frequencies, target
 sizes or refit dates must be declared before evaluation and archived under distinct
 output paths; no winner is selected automatically.
+
+## Continuous integration
+
+`.github/workflows/research-quality.yml` runs Python 3.12 installation with
+`.[dev,research]`, pytest, Ruff lint/format and `git diff --check` on PRs and
+pushes to this branch. Tests use synthetic fixtures and no external datasets or
+HTTP downloads. `QUANTITO_OFFLINE_TESTS=1` explicitly skips the existing Docker
+build smoke test because its dependency installation can require network; the
+Docker artifact checks still run and the integration smoke remains available
+outside offline mode. Run the same offline suite locally with:
+
+```sh
+QUANTITO_OFFLINE_TESTS=1 OMP_NUM_THREADS=1 .venv/bin/python -m pytest -q
+```
 
 ## Promotion gates
 

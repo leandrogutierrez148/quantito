@@ -46,6 +46,21 @@ Development ends in 2012; validation is 2013–14; subsequent retrospective
 assessment is 2015–17, with 2017 partial. All dates are frozen before results.
 No 2023–26 equity evaluation is possible from this archive.
 
+Two explicit training-label modes use the same delayed execution:
+
+| Mode | Training label with default config | Label cutoff timestamp | Role |
+| --- | --- | --- | --- |
+| execution_aligned | log(open[t+5] / open[t+1]) | date of t+5 | Principal result |
+| source_label_emulation | log(open[t+4] / open[t]) | date of t+4 | Ordinal-source comparison only |
+
+Both enter at t+1 and exit at t+5. All offsets count trading observations, not
+calendar days. `label_exit` must be strictly before the annual cutoff (an exit
+exactly on Jan 1 is excluded). The emulation label deliberately differs from the
+traded interval; do not present its result as the execution-aligned experiment.
+Each mode has a separate effective config hash including mode and evaluation
+years, frozen before training/results. The original published +0.3482% belongs
+to the emulation mode, not the corrected principal result.
+
 All valid symbols are attempted; short histories without 336-bar warmup are
 reported as ineligible. Equal-weight results allocate fixed equal capital to all
 evaluated symbols and leave missing history as cash, avoiding daily survivor
@@ -71,3 +86,9 @@ Original features through 2025 come from persisted local Binance-derived panels;
 recent features come from the official minute series. Compare overlapping opens
 against local sources before treating the two provenance segments as equivalent.
 The reproduced metric table and source manifests carry any discrepancies.
+
+An existing corrupt archive is renamed to `.corrupt` (unique suffixes preserve
+earlier corrupt copies). Downloaded bytes go to `.zip.part`; checksum validation
+precedes an atomic same-directory rename to the final ZIP. Failed downloads are
+also quarantined, leaving the final name available for the next attempt. Unit
+tests exercise this lifecycle with injected byte writers and no HTTP calls.

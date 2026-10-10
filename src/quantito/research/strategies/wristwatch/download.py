@@ -16,6 +16,41 @@ from quantito.research.strategies.wristwatch.report import write_json
 BASE = "https://data.binance.vision/data/spot/monthly/klines/BTCUSDT/1m/"
 
 
+def quarantine(path):
+    """Keep a corrupt file for inspection without blocking subsequent retries."""
+    path = Path(path)
+    destination = path.with_name(path.name + ".corrupt")
+    suffix = 1
+    while destination.exists():
+        destination = path.with_name(path.name + f".corrupt.{suffix}")
+        suffix += 1
+    path.rename(destination)
+    return destination
+
+
+def verified_archive(path, checksum, download_to):
+    """Validate/commit independently of HTTP; download_to writes a .part path."""
+    path = Path(path)
+    if path.exists():
+        if sha256(path) == checksum:
+            return checksum
+        quarantine(path)
+    partial = path.with_name(path.name + ".part")
+    try:
+        download_to(partial)
+        digest = sha256(partial)
+        if digest != checksum:
+            raise ValueError(f"Checksum mismatch {path.name}")
+        # Same directory/filesystem: no final ZIP is visible before validation.
+        partial.replace(path)
+    except BaseException:
+        # Preserve failed bytes, including interrupted downloads, for inspection.
+        if partial.exists():
+            quarantine(partial)
+        raise
+    return digest
+
+
 def download_months(directory, first, last):
     out = Path(directory).expanduser().resolve()
     repo = Path(__file__).resolve().parents[5]
@@ -46,17 +81,13 @@ def download_months(directory, first, last):
         try:
             with request(url + ".CHECKSUM", 30) as response:
                 checksum = response.read().decode().split()[0]
-            if not path.exists():
-                with (
-                    request(url, 60) as response,
-                    path.with_suffix(".part").open("wb") as stream,
-                ):
+
+            def download_to(partial):
+                with request(url, 60) as response, partial.open("wb") as stream:
                     while chunk := response.read(1024 * 1024):
                         stream.write(chunk)
-                path.with_suffix(".part").rename(path)
-            digest = sha256(path)
-            if digest != checksum:
-                raise ValueError(f"Checksum mismatch {filename}")
+
+            digest = verified_archive(path, checksum, download_to)
             return {"file": filename, "url": url, "sha256": digest, "status": "VERIFIED"}
         except urllib.error.HTTPError as exc:
             if exc.code == 404:

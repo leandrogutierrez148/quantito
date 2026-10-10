@@ -73,47 +73,98 @@ Los artefactos incluyen también año, volatilidad, operaciones, exposición,
 turnover y duración; posiciones consecutivas iguales se netean y pueden durar
 más de dos horas como posición económica continua.
 
-## ZIP de Leandro: adaptación diaria obligatoria
+## ZIP de Leandro: adaptación diaria obligatoria corregida
 
 8.539 instrumentos únicos; 8.431 válidos, 108 rechazados explícitamente.
 7.132 evaluados, 1.299 sin evaluación elegible tras warmup. Partición común
-congelada antes de métricas: desarrollo hasta 2012, validación 2013–2014,
+congelada antes de cada corrida: desarrollo hasta 2012, validación 2013–2014,
 evaluación retrospectiva 2015–2017. Sin datos de 2025 o 2026 en este ZIP.
 
-| Medida cross-sectional, 2013–2017 parcial | Resultado |
-| --- | ---: |
-| PnL neto medio / equal-weight, 5 bps | +0,3482% |
-| Mediana neta | +0,0232% |
-| Símbolos rentables | 50,62% |
-| Medio neto, costos 0 / 10 / 20 bps | +0,6074% / +0,0889% / -0,4295% |
-| Contribución media long / short | -0,1371% / +0,4852% |
-| Exposición absoluta media | 2,624% |
-| Buy-and-hold equal-weight | +10,0931% |
-| Cash | 0% |
-| Concentración de PnL absoluto, top 10 | 2,66% |
-| ETFs: 1284 evaluados, medio / mediana | +0,4139% / +0,1003% |
-| Acciones: 5848 evaluadas, medio / mediana | +0,3337% / 0% |
+La revisión corrigió el desalineamiento entre label y ejecución. El resultado
+principal es **execution_aligned**: entrenamiento log(open[t+5]/open[t+1]),
+con label_entry t+1 y label_exit t+5. **source_label_emulation** conserva
+log(open[t+4]/open[t]) y label_exit t+4 sólo para comparar el mapeo ordinal original.
+Ambos operan t+1→t+5; los offsets son observaciones de negociación, no días
+calendario. Cada modo excluye del entrenamiento labels cuyo exit no sea
+estrictamente anterior al cutoff anual. Tests de índices, cutoff y PnL realizado
+verifican la alineación; no se cambiaron costos ni se eligieron símbolos ganadores.
 
-Buy-and-hold tiene exposición 100%, la estrategia máximo 15% y media 2,624%:
-no es una comparación de riesgo equivalente. Años equal-weight con capital fijo:
-2013 -0,1099%, 2014 +0,2004%, 2015 +0,3512%, 2016 -0,0639%, 2017 -0,0297%.
-Validación suma +0,0905%; evaluación posterior +0,2577%. No se eligieron símbolos
-por resultado, ni se redistribuyó capital diariamente hacia sobrevivientes.
+| Medida 2013–2017 parcial, 5 bps round-trip | execution_aligned, principal | source_label_emulation, comparación |
+| --- | ---: | ---: |
+| PnL neto medio / equal-weight | +0.940837% | +0.348158% |
+| Cambio contra el resultado anterior | +0.592679 pp | +0.000000 pp |
+| Mediana neta | +0.000000% | +0.023230% |
+| Símbolos rentables | 48.9905% | 50.6169% |
+| Bruto / costo 0 bps, medio | +1.153481% | +0.607387% |
+| Neto medio, costo 10 bps | +0.728194% | +0.088928% |
+| Neto medio, costo 20 bps | +0.302906% | -0.429531% |
+| Contribución media long | +0.278215% | -0.137075% |
+| Contribución media short | +0.662622% | +0.485233% |
+| Exposición absoluta media | 2.3506% | 2.6240% |
+| Equal-weight máximo DD log | -0.584225% | -0.502885% |
+| Equal-weight Sharpe, 252 | 0.768051 | 0.266305 |
+| Validación 2013–2014 | +0.320440% | +0.090497% |
+| Evaluación retrospectiva 2015–2017 | +0.620397% | +0.257660% |
+
+El +0,3481578767% previamente publicado pertenece exclusivamente al modo de
+emulación. El resultado principal actual es +0.940837%, un cambio
+de +0.592679 puntos porcentuales. La corrección
+se hizo después de inspeccionar el dataset y de la review; no crea un holdout nuevo.
+No se mezclan conclusiones de la adaptación diaria con la reproducción BTC.
+
+Buy-and-hold equal-weight sigue en +10.093054% y cash en 0%.
+Buy-and-hold tiene exposición 100%, la estrategia máximo 15%; no es una comparación
+de riesgo equivalente. Equal-weight usa capital fijo sobre los 7.132 símbolos y
+deja historia faltante en cash, sin redistribución hacia sobrevivientes.
+
+Años del modo principal (PnL log):
+
+- 2013: +0.008554%.
+- 2014: +0.311886%.
+- 2015: +0.450565%.
+- 2016: -0.066002%.
+- 2017: +0.235835%.
+
+ETFs: 1284 evaluados, media +0.595913%; acciones: 5848 evaluadas, media +1.016570%.
 
 La distribución, mejores/peores descriptivos, métricas por símbolo, costos,
-long/short, Sharpe, DD, trades, exposición y estabilidad anual están en
-`artifacts/wristwatch/`. Los agregados pequeños se versionan en
-[`results/2026-10-10`](results/2026-10-10/); datasets y curvas grandes están ignorados.
+long/short, Sharpe, DD, trades, exposición y estabilidad anual se regeneraron en
+`artifacts/wristwatch/daily_revision/<modo>/`. Los artefactos diarios del directorio
+raíz se actualizaron al modo principal. Los agregados pequeños principales están
+versionados en `results/2026-10-10/`, y los de comparación en su subdirectorio
+`source_label_emulation/`. Los configs incluyen mode y years en el hash efectivo.
 No hay sectores verificables; sólo clasificación Stock/ETF por estructura del ZIP.
+
+## Correcciones de calidad y CI
+
+`run_daily()` usa `TemporaryDirectory` y elimina los Parquet temporales al terminar
+o al propagarse una excepción. Dos tests reales con un ZIP sintético verifican
+cleanup tras éxito y tras fallo de fit después de escribir el cache.
+El downloader preserva ZIPs corruptos con sufijo `.corrupt`, valida `.part` y sólo
+entonces renombra atómicamente; tests sin HTTP verifican fallo, recuperación,
+interrupción y reutilización de un archivo válido.
+
+Se agregó GitHub Actions Python 3.12: instalación `.[dev,research]`, pytest, Ruff
+lint/formato y `git diff --check`. Tests sintéticos y offline; el Docker build
+smoke existente se omite explícitamente con `QUANTITO_OFFLINE_TESTS=1` porque
+puede descargar dependencias. Suite local: 62 passed, 1 skipped, 29 subtests;
+unittest 63 tests OK, 1 skipped; Ruff y diff checks OK. Sin datasets, caches,
+Parquet grandes ni credenciales incorporados a Git. PR conservado como Draft.
 
 ## Conclusión y decisiones pendientes
 
-Se reproduce la cifra histórica con targets guardados, pero el edge no muestra
-robustez suficiente: las tres variantes pierden neto en 2025, dos pierden en
-2026 y los costos eliminan rápidamente los beneficios. La adaptación diaria
-muestra resultados débiles e inestables, sin evidencia estadística suficiente
-de generalización ni exclusividad BTC. No se calcula significancia sobre un
-universo con ajustes, deslistados y derechos de uso sin verificar.
+Se reproduce la cifra histórica con targets guardados, pero el edge BTC no
+muestra robustez suficiente: las tres variantes pierden neto en 2025, dos pierden
+en 2026 y sus costos erosionan rápidamente los beneficios. La corrección del
+label diario aumenta el neto medio a +0,940837% y mantiene +0,302906% a 20 bps:
+ya no corresponde afirmar que esos costos eliminan el beneficio del modo diario
+principal. Sin embargo, mediana 0%, sólo 48,99% de símbolos rentables, retornos
+pequeños y metadata no verificada no demuestran generalización estadísticamente
+defendible ni exclusividad BTC. El resultado depende materialmente de alinear
+label y ejecución; no se seleccionó el modo por ser el más rentable, sino por
+corresponder al intervalo operado. No se calcula significancia sobre un universo
+con ajustes, deslistados y derechos de uso sin verificar. La recomendación de
+no promover a ejecución se mantiene.
 
 Antes de promoción: resolver los gaps sin selección por precios futuros,
 certificar paneles y fuente, confirmar licencia/ajustes/delistados, modelar borrow

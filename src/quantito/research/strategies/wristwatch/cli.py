@@ -11,7 +11,7 @@ import pandas as pd
 import sklearn
 
 from quantito.research.strategies.wristwatch.config import Config
-from quantito.research.strategies.wristwatch.daily import run_daily
+from quantito.research.strategies.wristwatch.daily import LABEL_MODES, run_daily
 from quantito.research.strategies.wristwatch.data import (
     audit_zip,
     load_panels,
@@ -243,6 +243,7 @@ def main(argv=None):
     parser.add_argument("--target", type=float, default=0.15)
     parser.add_argument("--cost-bps", type=float, default=5)
     parser.add_argument("--delay-minutes", type=int, default=1)
+    parser.add_argument("--daily-label-mode", choices=LABEL_MODES, default="execution_aligned")
     args = parser.parse_args(argv)
     config = Config(
         target=args.target,
@@ -262,7 +263,7 @@ def main(argv=None):
         if args.experiment == "daily-cross-asset":
             if audit["frequency"] != "daily":
                 raise ValueError("Daily adaptation cannot silently accept mixed frequencies")
-            run_daily(args.dataset, args.output, config)
+            run_daily(args.dataset, args.output, config, label_mode=args.daily_label_mode)
     else:
         if args.binance_dir is None or not args.panel_dir:
             parser.error("--binance-dir and --panel-dir required")
