@@ -1,0 +1,25 @@
+{
+  "adjustment": "unknown; cannot establish split/dividend or point-in-time adjustments",
+  "archive_files": 17078,
+  "biases": [
+    "unverified survivor/delisted coverage",
+    "no corporate-action metadata",
+    "incomplete histories",
+    "no exchange calendar or sectors",
+    "static hindsight universe"
+  ],
+  "bytes": 515591518,
+  "file": "archive.zip",
+  "first_date": "1962-01-02",
+  "frequency": "daily",
+  "last_date": "2017-11-10",
+  "license": "not provided",
+  "metadata_members": [],
+  "mirrored_files": 8539,
+  "provider": "not documented; format resembles Stooq/Kaggle stocks, attribution unverified",
+  "rejected_symbols": 108,
+  "sha256": "d9317c8fb2d63b9b00db5f933b6c9639d2bf7ea3b918169bb5cec5903dce85a1",
+  "timezone": "date labels only; UTC localization is storage, not exchange execution time",
+  "unique_symbols": 8539,
+  "valid_symbols": 8431
+}

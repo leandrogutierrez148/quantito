@@ -1,0 +1,24 @@
+{
+  "2025_status": "already inspected, retrospective",
+  "2026_status": "frozen before this evaluation; local research may have inspected 2026, do not claim pristine holdout",
+  "config": {
+    "daily_delay_bars": 1,
+    "execution_delay_minutes": 1,
+    "gate_quantile": 0.8,
+    "hold_bars": 4,
+    "max_iter": 100,
+    "round_trip_cost_bps": 5,
+    "seed": 432,
+    "target": 0.15
+  },
+  "numpy": "2.4.0",
+  "pandas": "2.3.3",
+  "periods": {
+    "2025": "2025-01-02/2026-01-01",
+    "2026": "2026-01-02/latest complete source",
+    "history": "2018-01-01/2024-08-03"
+  },
+  "python": "3.12.0",
+  "sha256": "77966d68f70960eb05e5c31ae3e8ac38920cd04d8c9f7884bf3a8f962b3ff023",
+  "sklearn": "1.7.2"
+}

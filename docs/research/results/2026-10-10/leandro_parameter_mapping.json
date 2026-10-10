@@ -1,0 +1,17 @@
+{
+  "1h_4h_1d_1w_returns": "2/8/48/336 prior trading observations",
+  "2h_hold": "4 trading observations; entry one observation after decision",
+  "4h_1d_vwap": "8/48 prior trading observations; close*volume proxy, not true traded VWAP",
+  "calendar": "development through 2012, validation 2013-2014, retrospective evaluation 2015-2017",
+  "daily_range": "48 prior observations high/low",
+  "experiment_name": "wristwatch_daily_cross_asset_adaptation",
+  "gate": "one global prior-90-calendar-day fitted-score q80, no per-symbol tuning",
+  "hour_seasonality": "disabled: sin=0, cos=1; daily dates have no intraday timestamp",
+  "reason_for_calendar": "ZIP ends in 2017; 2023-2026 unavailable",
+  "refit": "pooled expanding annual model; labels must exit before Jan 1",
+  "scope": "Hypothesis adaptation, not literal BTC reproduction; no per-symbol optimization",
+  "source_30min_bar": "one trading-day observation",
+  "source_60min_vwap_sigma": "two prior daily observations; sample std of 2 log returns",
+  "training_sample": "up to 40 deterministically sampled historical rows per symbol/year refit",
+  "weekday": "weekday of date label; no execution session claim"
+}
