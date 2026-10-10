@@ -3,7 +3,7 @@ import logging
 import os
 import sys
 
-from engine.server import run_server
+from quantito.server import run_server
 
 # Configure logging to output to stdout
 logging.basicConfig(

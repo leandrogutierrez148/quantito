@@ -2,9 +2,9 @@ import unittest
 
 from fastapi.testclient import TestClient
 
-from engine.server import app
-from engine.strategies.base import BaseStrategy
-from engine.strategies.registry import StrategyRegistry
+from quantito.server import app
+from quantito.strategies.base import BaseStrategy
+from quantito.strategies.registry import StrategyRegistry
 
 
 class TestFastAPIServer(unittest.TestCase):

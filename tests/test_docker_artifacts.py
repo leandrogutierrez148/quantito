@@ -32,7 +32,7 @@ class DockerArtifactTests(unittest.TestCase):
         self.assertNotIn("COPY . .", dockerfile)
         self.assertIn("COPY pyproject.toml README.md ./", dockerfile)
         self.assertIn("COPY main.py ./main.py", dockerfile)
-        self.assertIn("COPY engine ./engine", dockerfile)
+        self.assertIn("COPY src ./src", dockerfile)
         self.assertNotIn("COPY pipelines", dockerfile)
         self.assertNotIn("COPY utils", dockerfile)
         self.assertNotIn("eodhd-api.httpbook", dockerfile)
@@ -45,15 +45,15 @@ class DockerArtifactTests(unittest.TestCase):
         self.assertFalse(dockerignore_includes("utils/eodhd-api.httpbook", rules))
         self.assertFalse(dockerignore_includes(".git/config", rules))
         self.assertTrue(dockerignore_includes("main.py", rules))
-        self.assertTrue(dockerignore_includes("engine/models.py", rules))
+        self.assertTrue(dockerignore_includes("src/quantito/models.py", rules))
         self.assertFalse(dockerignore_includes("pipelines/real_time.py", rules))
 
     def test_import_container_smoke_script_exists(self):
-        script_path = REPO_ROOT / "scripts" / "import_container_smoke_test.sh"
+        script_path = REPO_ROOT / "tests" / "scripts" / "import_container_smoke_test.sh"
         self.assertTrue(script_path.exists())
         script_contents = script_path.read_text()
         self.assertIn("docker build -t", script_contents)
-        self.assertIn("import main, engine, engine.server", script_contents)
+        self.assertIn("import main, quantito, quantito.server", script_contents)
 
     def test_import_container_smoke_script(self):
         if not shutil.which("docker"):
@@ -70,7 +70,7 @@ class DockerArtifactTests(unittest.TestCase):
             self.skipTest("docker daemon is not available")
 
         subprocess.run(
-            ["bash", "scripts/import_container_smoke_test.sh", "quantito-import-smoke-test"],
+            ["bash", "tests/scripts/import_container_smoke_test.sh", "quantito-import-smoke-test"],
             cwd=REPO_ROOT,
             check=True,
         )

@@ -10,11 +10,13 @@ WORKDIR /app
 
 # Install dependencies from pyproject.toml
 COPY pyproject.toml README.md ./
+COPY src ./src
 RUN pip install --no-cache-dir .
 
 # Copy only required application runtime modules
 COPY main.py ./main.py
-COPY engine ./engine
+
+ENV PYTHONPATH=/app/src
 
 # Create a non-privileged user for better security and switch to it
 RUN useradd -u 10001 appuser && chown -R appuser /app

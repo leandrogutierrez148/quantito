@@ -2,7 +2,7 @@ import logging
 from collections.abc import Callable
 from typing import Any, ClassVar
 
-from engine.strategies.base import BaseStrategy
+from quantito.strategies.base import BaseStrategy
 
 logger = logging.getLogger(__name__)
 

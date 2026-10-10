@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from engine.models import Signal
+from quantito.models import Signal
 
 
 class BaseStrategy(ABC):

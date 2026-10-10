@@ -7,7 +7,13 @@
 venv/
 env/
 
-# Python cache
+# Python cache & packaging
 __pycache__/
 *.py[cod]
 *$py.class
+*.egg-info/
+*.egg
+build/
+dist/
+.ruff_cache/
+.pytest_cache/
