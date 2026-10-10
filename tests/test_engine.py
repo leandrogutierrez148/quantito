@@ -1,10 +1,9 @@
 import datetime
 import os
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from quantito import (
-    BaseSignalSink,
     BaseStrategy,
     Signal,
     SignalEngine,
@@ -127,16 +126,13 @@ class TestSignalEngine(unittest.TestCase):
 
     def test_signal_engine_execution_and_hot_swap(self):
         strategy_1 = DummyTestStrategy(multiplier=1)
-        mock_sink = MagicMock(spec=BaseSignalSink)
-
-        engine = SignalEngine(strategy=strategy_1, sinks=[mock_sink])
+        engine = SignalEngine(strategy=strategy_1)
         self.assertEqual(engine.strategy.name, "dummy_test")
 
         # Process with strategy 1
         signals = engine.process([{"dummy": "data"}])
         self.assertEqual(len(signals), 1)
         self.assertEqual(signals[0].price, 100.0)
-        mock_sink.send.assert_called_once_with(signals)
 
         # Hot-swap strategy to PriceMomentumStrategy
         strategy_2 = PriceMomentumStrategy(min_change_pct=1.0)
@@ -154,7 +150,6 @@ class TestSignalEngine(unittest.TestCase):
         {
             "STRATEGY_NAME": "fifty_day_avg",
             "STRATEGY_PARAMS": '{"threshold_pct": 3.5, "signal_on": "above"}',
-            "ENABLE_BQ_SIGNALS": "false",
         },
     )
     def test_from_environment(self):

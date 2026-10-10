@@ -13,29 +13,24 @@ Quantito is a Python (3.12+) quantitative analysis, signal generation, and strat
 ```
 quantito/
 ├── src/
-│   └── quantito/                # Central signal generation and dispatching package
+│   └── quantito/                # Central signal generation and evaluation package
 │       ├── __init__.py          # Exports clean public API (SignalEngine, Signal, app, etc.)
 │       ├── models.py            # Data models: Signal (dataclass), SignalType (StrEnum)
 │       ├── core.py              # SignalEngine orchestrator (Strategy pattern, hot-swapping)
 │       ├── server.py            # FastAPI HTTP server for strategy evaluation
-│       ├── strategies/          # Quantitative strategies
-│       │   ├── __init__.py      # Auto-registration of available strategies
-│       │   ├── base.py          # Abstract BaseStrategy class
-│       │   ├── registry.py      # StrategyRegistry (decorator & dynamic factory)
-│       │   ├── fifty_day_avg.py # 50-day moving average strategy
-│       │   └── price_momentum.py# Price momentum / percentage change strategy
-│       └── sinks/               # Output signal destinations
-│           ├── __init__.py      # Exports available sinks
-│           ├── base.py          # Abstract BaseSignalSink class
-│           ├── console.py       # Formatted console output
-│           └── bigquery.py      # Google Cloud BigQuery persistence
+│       └── strategies/          # Quantitative strategies
+│           ├── __init__.py      # Auto-registration of available strategies
+│           ├── base.py          # Abstract BaseStrategy class
+│           ├── registry.py      # StrategyRegistry (decorator & dynamic factory)
+│           ├── fifty_day_avg.py # 50-day moving average strategy
+│           └── price_momentum.py# Price momentum / percentage change strategy
 ├── notebooks/                   # Jupyter Notebooks for analysis and backtesting
 ├── tests/                       # Unit test suite (unittest)
 ├── main.py                      # CLI/Docker entry point (Strategy Server launcher)
 └── pyproject.toml               # Project configuration, dependencies, and Ruff rules
 ```
 
-> **Ingestion Pipelines**: Data collection pipelines and scrapers have been separated into [`quantito-pipe`](file:///Users/lgutierrez/Proyectos/quantito-pipe).
+> **Architecture Separation**: Signal sinks, persistence, and dispatching are managed by [`quantito-engine`](file:///Users/lgutierrez/Proyectos/quantito-engine). Data ingestion pipelines are managed by [`quantito-pipe`](file:///Users/lgutierrez/Proyectos/quantito-pipe).
 
 ---
 
@@ -124,11 +119,6 @@ class RSICrossoverStrategy(BaseStrategy):
         # Signal calculation logic...
         return []
 ```
-
-### 3.2. How to Add a New Output Sink
-1. Create the file in `engine/sinks/<sink_name>.py`.
-2. Inherit from `BaseSignalSink` and implement `send(signals: list[Signal]) -> None`.
-3. Expose it in `engine/sinks/__init__.py`.
 
 ---
 
