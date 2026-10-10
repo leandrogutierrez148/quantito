@@ -3,5 +3,5 @@
 !pyproject.toml
 !README.md
 !main.py
-!engine/
-!engine/**
+!src/
+!src/**

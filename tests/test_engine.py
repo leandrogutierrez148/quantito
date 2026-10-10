@@ -3,7 +3,7 @@ import os
 import unittest
 from unittest.mock import MagicMock, patch
 
-from engine import (
+from quantito import (
     BaseSignalSink,
     BaseStrategy,
     Signal,
@@ -11,8 +11,8 @@ from engine import (
     SignalType,
     StrategyRegistry,
 )
-from engine.strategies.fifty_day_avg import FiftyDayAverageStrategy
-from engine.strategies.price_momentum import PriceMomentumStrategy
+from quantito.strategies.fifty_day_avg import FiftyDayAverageStrategy
+from quantito.strategies.price_momentum import PriceMomentumStrategy
 
 
 class DummyTestStrategy(BaseStrategy):

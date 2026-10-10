@@ -8,8 +8,8 @@ import uvicorn
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel, Field
 
-from engine.models import Signal
-from engine.strategies.registry import StrategyRegistry
+from quantito.models import Signal
+from quantito.strategies.registry import StrategyRegistry
 
 logger = logging.getLogger(__name__)
 

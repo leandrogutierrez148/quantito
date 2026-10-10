@@ -3,8 +3,8 @@ import json
 import logging
 import os
 
-from engine.models import Signal
-from engine.sinks.base import BaseSignalSink
+from quantito.models import Signal
+from quantito.sinks.base import BaseSignalSink
 
 logger = logging.getLogger(__name__)
 

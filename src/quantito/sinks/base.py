@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from engine.models import Signal
+from quantito.models import Signal
 
 
 class BaseSignalSink(ABC):

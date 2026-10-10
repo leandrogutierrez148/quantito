@@ -4,13 +4,13 @@ import os
 from typing import Any
 
 # Ensure strategies are registered
-import engine.strategies  # noqa: F401
-from engine.models import Signal
-from engine.sinks.base import BaseSignalSink
-from engine.sinks.bigquery import BigQuerySignalSink
-from engine.sinks.console import ConsoleSignalSink
-from engine.strategies.base import BaseStrategy
-from engine.strategies.registry import StrategyRegistry
+import quantito.strategies  # noqa: F401
+from quantito.models import Signal
+from quantito.sinks.base import BaseSignalSink
+from quantito.sinks.bigquery import BigQuerySignalSink
+from quantito.sinks.console import ConsoleSignalSink
+from quantito.strategies.base import BaseStrategy
+from quantito.strategies.registry import StrategyRegistry
 
 logger = logging.getLogger(__name__)
 

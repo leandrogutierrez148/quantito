@@ -8,7 +8,7 @@
 
 ## Features
 
-- **Strategy Engine (`engine`)**: Extensible registry pattern (`StrategyRegistry`) supporting pluggable quantitative strategies (e.g. 50-Day Moving Average, Price Momentum, RSI, etc.).
+- **Strategy Engine (`quantito`)**: Extensible registry pattern (`StrategyRegistry`) supporting pluggable quantitative strategies (e.g. 50-Day Moving Average, Price Momentum, RSI, etc.).
 - **Signal Dispatchers (`sinks`)**: Modular destinations for generated signals (Console, Google Cloud BigQuery, Webhooks).
 - **FastAPI HTTP Execution API**: REST endpoints for dynamic strategy discovery and on-demand signal evaluation.
 - **Strict Typing & Linting**: Built on Python 3.12+ with native typing, full Ruff linting compliance, and 100% unit test coverage.
@@ -37,7 +37,7 @@ pip install -e ".[dev]"
 ruff check . && ruff format --check .
 
 # Run unit tests
-PYTHONPATH=. python -m unittest discover tests
+python -m unittest discover tests
 
 # Start the Strategy Execution Server
 python main.py --host 0.0.0.0 --port 8080

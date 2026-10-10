@@ -1,9 +1,9 @@
 import datetime
 from typing import Any
 
-from engine.models import Signal, SignalType
-from engine.strategies.base import BaseStrategy
-from engine.strategies.registry import StrategyRegistry
+from quantito.models import Signal, SignalType
+from quantito.strategies.base import BaseStrategy
+from quantito.strategies.registry import StrategyRegistry
 
 
 @StrategyRegistry.register("fifty_day_avg")
