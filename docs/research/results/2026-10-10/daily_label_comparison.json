@@ -1,0 +1,51 @@
+{
+  "execution_both": "t+1 -> t+5",
+  "labels": {
+    "execution_aligned": "t+1 -> t+5",
+    "source_label_emulation": "t -> t+4"
+  },
+  "metrics": [
+    {
+      "change_from_previous_percentage_points": 0.5926794842121641,
+      "config_hash": "685bc4861124dbf839c092d676f64f80245253e211247d370247b092f57c619f",
+      "cost_10bp_mean_log_pct": 0.7281936424409796,
+      "cost_20bp_mean_log_pct": 0.3029062055368853,
+      "equal_weight_max_drawdown_log_pct": -0.5842249133956415,
+      "equal_weight_sharpe_252": 0.7680512456543697,
+      "evaluated_symbols": 7132,
+      "gross_mean_log_pct": 1.1534810793450736,
+      "label_mode": "execution_aligned",
+      "long_mean_net_log_pct": 0.2782148701569423,
+      "mean_abs_exposure": 0.02350639714653272,
+      "mean_net_log_pct": 0.9408373608930267,
+      "median_net_log_pct": 0.0,
+      "profitable_fraction": 0.48990465507571507,
+      "retrospective_evaluation_2015_2017_net_log_pct": 0.6203973475909498,
+      "role": "principal",
+      "short_mean_net_log_pct": 0.6626224907360844,
+      "validation_2013_2014_net_log_pct": 0.32044001330207683
+    },
+    {
+      "change_from_previous_percentage_points": 0.0,
+      "config_hash": "d62b46b0ac285505e5bcdd3cb2c0b5c5d563971cd17b89db5053d0790706b6ea",
+      "cost_10bp_mean_log_pct": 0.08892834779695902,
+      "cost_20bp_mean_log_pct": -0.42953070997084797,
+      "equal_weight_max_drawdown_log_pct": -0.5028846857879651,
+      "equal_weight_sharpe_252": 0.26630481895077207,
+      "evaluated_symbols": 7132,
+      "gross_mean_log_pct": 0.6073874055647661,
+      "label_mode": "source_label_emulation",
+      "long_mean_net_log_pct": -0.13707468914743803,
+      "mean_abs_exposure": 0.026240311483303344,
+      "mean_net_log_pct": 0.3481578766808626,
+      "median_net_log_pct": 0.023230441554656506,
+      "profitable_fraction": 0.5061693774537297,
+      "retrospective_evaluation_2015_2017_net_log_pct": 0.25766049151606907,
+      "role": "comparison only",
+      "short_mean_net_log_pct": 0.4852325658283006,
+      "validation_2013_2014_net_log_pct": 0.09049738516479353
+    }
+  ],
+  "previous_emulation_mean_net_log_pct": 0.3481578766808626,
+  "warning": "Post-review correction on already inspected data; not a new holdout. PnL is additive log, not executable account return."
+}

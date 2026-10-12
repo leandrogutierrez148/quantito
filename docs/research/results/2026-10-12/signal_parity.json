@@ -1,0 +1,9 @@
+{
+  "annual_fit_records_identical": true,
+  "current_config_hash": "685bc4861124dbf839c092d676f64f80245253e211247d370247b092f57c619f",
+  "evaluated_symbols": 7132,
+  "max_metric_absolute_difference": 0.0,
+  "previous_config_hash": "685bc4861124dbf839c092d676f64f80245253e211247d370247b092f57c619f",
+  "source_zip_sha256": "d9317c8fb2d63b9b00db5f933b6c9639d2bf7ea3b918169bb5cec5903dce85a1",
+  "statement": "All previous principal metrics and annual fits preserved; diagnostics do not alter strategy or universe."
+}

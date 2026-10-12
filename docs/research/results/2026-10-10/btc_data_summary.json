@@ -1,0 +1,13 @@
+{
+  "all_checksums_verified": true,
+  "archives": 109,
+  "cached_feature_panels_through": "2025-12-31",
+  "coverage": "2017-09 through 2026-09",
+  "history_regenerated_status": "BLOCKED_MISSING_REALIZED_DATA",
+  "minutes_missing_on_grid": 30163,
+  "no_rounding_or_filling": true,
+  "note": "Frozen source targets reproduce the brief; causal regeneration rejects invested gaps. Full detailed per-file SHA manifests remain in ignored artifacts.",
+  "off_minute_quarantined": 21602,
+  "recent_features": "official minute OHLCV",
+  "source": "Binance official public spot BTCUSDT monthly ZIP"
+}

@@ -17,3 +17,7 @@ build/
 dist/
 .ruff_cache/
 .pytest_cache/
+
+# Research outputs and external market data
+artifacts/
+research-data/

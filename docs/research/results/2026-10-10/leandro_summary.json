@@ -1,0 +1,68 @@
+{
+  "best_descriptive_only": [
+    {
+      "net_additive_log_pct": 114.86167996781067,
+      "symbol": "bas.us"
+    },
+    {
+      "net_additive_log_pct": 110.31907520942265,
+      "symbol": "orig.us"
+    },
+    {
+      "net_additive_log_pct": 107.0645463335925,
+      "symbol": "rsls.us"
+    },
+    {
+      "net_additive_log_pct": 92.45087379232831,
+      "symbol": "rxii.us"
+    },
+    {
+      "net_additive_log_pct": 87.6600300191826,
+      "symbol": "atos.us"
+    }
+  ],
+  "buy_hold_equal_weight_net_log_pct": 10.093054191387521,
+  "config_hash": "685bc4861124dbf839c092d676f64f80245253e211247d370247b092f57c619f",
+  "cost_sensitivity_mean_log_pct": {
+    "0": 1.1534810793450736,
+    "10": 0.7281936424409796,
+    "20": 0.3029062055368853,
+    "5": 0.9408373608930267
+  },
+  "equal_weight_net_log_pct": 0.9408373608930267,
+  "evaluated_symbols": 7132,
+  "label_mode": "execution_aligned",
+  "mean_abs_exposure": 0.02350639714653272,
+  "mean_long_net_log_pct": 0.2782148701569423,
+  "mean_net_log_pct": 0.9408373608930267,
+  "mean_short_net_log_pct": 0.6626224907360844,
+  "median_net_log_pct": 0.0,
+  "no_evaluation": 1299,
+  "profitable_fraction": 0.48990465507571507,
+  "rejected": 108,
+  "result_role": "principal",
+  "top_10_absolute_pnl_share": 0.02986456063611476,
+  "warning": "Daily hypothesis adaptation; unknown adjustments/delistings, hindsight universe, hypothetical shorting. Not BTC reproduction or evidence of tradable alpha.",
+  "worst_descriptive_only": [
+    {
+      "net_additive_log_pct": -56.813122002312596,
+      "symbol": "drys.us"
+    },
+    {
+      "net_additive_log_pct": -54.18524396320585,
+      "symbol": "glbs.us"
+    },
+    {
+      "net_additive_log_pct": -53.973147026652256,
+      "symbol": "tell.us"
+    },
+    {
+      "net_additive_log_pct": -47.20982614566414,
+      "symbol": "vly-ws.us"
+    },
+    {
+      "net_additive_log_pct": -46.49860515145376,
+      "symbol": "iova.us"
+    }
+  ]
+}

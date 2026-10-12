@@ -1,0 +1,34 @@
+[
+  {
+    "file": "build_wristwatch_leandro_brief_en_pdf.py",
+    "sha256": "f9ee28231116f6330808104daacbb1e932f63ac2dbea028dc31334b13c8e598a"
+  },
+  {
+    "file": "build_btc_causal_1m_features.py",
+    "sha256": "25af06c78d2592189075da69be1f6061b16f19266d48406ad4c73cff1f4ffdb5"
+  },
+  {
+    "file": "run_btc_multihorizon_is_2017_2024.py",
+    "sha256": "38bbcbdf2415d565a9e78e45511bb689dd2c9f7616f7c4f8716071564cce57d9"
+  },
+  {
+    "file": "run_btc_2h_expanding_is_walkforward.py",
+    "sha256": "ae36b78297dcd9a4a14bcc26438c07933eb74072b265ea878da2a76753102879"
+  },
+  {
+    "file": "run_btc_2h_intermediate_robustness.py",
+    "sha256": "558a3c2857b06320283652557035e97bf4732fcb54bf140f0d651fd6f042ee60"
+  },
+  {
+    "file": "audit_btc_2h_expanding_intraminute_is.py",
+    "sha256": "404f541e46ad1c857eca1cde00c4c82994efba10cb9ec7e8698b2df9936a587b"
+  },
+  {
+    "file": "run_btc_2h_6h_ca_calendar_2025.py",
+    "sha256": "51e323cadbd807afd4f7a70f66dfa7d1bece18462bdae3ff89a58f5c86cd04e7"
+  },
+  {
+    "file": "audit_btc_2h_6h_ca_calendar_2025_1m.py",
+    "sha256": "10f7777c4df26d1126010aaf4163a31f5b66636e859335e28aa5b74ca383cebd"
+  }
+]

@@ -160,3 +160,16 @@ docker build -t quantito:latest .
 # Run container (mapping host port 8081 to container port 8080)
 docker run -p 8081:8080 quantito:latest
 ```
+
+## 7. Research candidates
+
+Install `.[dev,research]` for the offline, unregistered
+[BTC Wristwatch POC](docs/research/wristwatch_btc_poc.md). See the separated
+[results and limitations](docs/research/wristwatch_results_2026-10-10.md),
+[dataset audit](docs/research/wristwatch_data_audit.md), and
+[ecosystem/portfolio review](docs/research/quantito_ecosystem_audit_2026-10-10.md).
+This candidate is not approved for execution. Large datasets and run artifacts
+are excluded from Git.
+The [daily signal/data-quality diagnostics](docs/research/daily_diagnostics_results_2026-10-12.md)
+compare frozen long/short signals and exposure controls at zero and five bps,
+before a separate future execution study.

@@ -1,0 +1,31 @@
+{
+  "annualization": "252 over union of observed date labels; no exchange-calendar certification",
+  "buy_hold_15pct": "constant 0.15 during each available evaluation history, terminal exit; different time exposure",
+  "calendar_gap_days": 7,
+  "concentration": "descriptive top absolute/positive PnL shares; never used to select a universe",
+  "costs_round_trip_bps": [
+    0,
+    5
+  ],
+  "execution": "unchanged next-bar opens; passive/active/hybrid execution deferred",
+  "experiment": "daily_signal_quality_diagnostics",
+  "flags": "investigation prompts, not confirmed splits, bad prices or delistings",
+  "forward_flags": "ex-post annotation of realized intervals, never used for signal or refit",
+  "jump_threshold_ratio": 1.4,
+  "long_same_windows": "abs(frozen signed target): identical timing and absolute exposure, always long",
+  "primary_cost_bps": 0,
+  "scenarios": [
+    "long_short",
+    "long_only",
+    "short_only",
+    "long_same_windows",
+    "buy_hold_15pct",
+    "cash"
+  ],
+  "scope": "2013-2017 already inspected; static hindsight universe, unknown adjustments and delistings",
+  "selection": "no flagged row/symbol excluded; no repair, winsorization or per-symbol tuning",
+  "signal": "label mode and effective config hash in ../daily_frozen_config.json; fits, seed, gate and universe unchanged",
+  "stale_close_run_bars": 5,
+  "weighting": "fixed 1/N across all evaluated symbols; missing history cash; group denominator fixed within group",
+  "zero_cost_role": "signal diagnostic, not a forecast of free real execution"
+}

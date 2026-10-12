@@ -1,0 +1,39 @@
+{
+  "adjustments": "unknown, flags do not certify splits or dividends",
+  "counts": {
+    "calendar_gap": {
+      "rows": 15180,
+      "symbols": 1366
+    },
+    "close_jump": {
+      "rows": 9244,
+      "symbols": 1949
+    },
+    "forward_calendar_gap": {
+      "rows": 15180,
+      "symbols": 1366
+    },
+    "forward_open_jump": {
+      "rows": 11153,
+      "symbols": 2014
+    },
+    "overnight_jump": {
+      "rows": 5905,
+      "symbols": 1425
+    },
+    "stale_close": {
+      "rows": 23962,
+      "symbols": 1683
+    },
+    "zero_volume": {
+      "rows": 27633,
+      "symbols": 1711
+    }
+  },
+  "delistings": "unknown, early history end does not prove delisting",
+  "evaluated_symbols": 7132,
+  "flags_used_for_signal_or_exclusion": false,
+  "histories_ending_before_archive_end": 476,
+  "license": "unknown",
+  "valid_symbols_inspected": 8431
+}
