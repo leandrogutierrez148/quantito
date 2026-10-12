@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 
 from quantito.research.strategies.wristwatch.data import canonical_members, read_daily
+from quantito.research.strategies.wristwatch.diagnostics import DailyDiagnostics
 from quantito.research.strategies.wristwatch.execution import account, trades_from_curve
 from quantito.research.strategies.wristwatch.report import metrics, write_json
 from quantito.research.strategies.wristwatch.signal import FEATURES, daily_features, make_model
@@ -107,6 +108,7 @@ def _run_daily(dataset, output, config, cache, years, label_mode):
     eligible = []
     groups = {}
     rejected = []
+    diagnostics = DailyDiagnostics(out)
     with zipfile.ZipFile(dataset) as archive:
         members, _ = canonical_members(archive)
         for i, member in enumerate(members):
@@ -114,6 +116,7 @@ def _run_daily(dataset, output, config, cache, years, label_mode):
             groups[symbol] = "ETF" if "ETFs/" in member.filename else "Stock"
             try:
                 bars = read_daily(archive, member)
+                flags = diagnostics.inspect(symbol, groups[symbol], bars)
                 features = daily_features(bars)
                 # Preserve chronology and valid future TRAINING labels only. Evaluation uses features alone.
                 h = config.hold_bars
@@ -121,6 +124,8 @@ def _run_daily(dataset, output, config, cache, years, label_mode):
                 features = features.join(labels)
                 features["open"] = bars.open
                 features["aligned"] = np.arange(len(bars)) % h == 0
+                for name in flags:
+                    features[f"qa_{name}"] = flags[name]
                 features.to_parquet(cache / f"{symbol}.parquet")
                 eligible.append(symbol)
                 for year in years:
@@ -197,6 +202,8 @@ def _run_daily(dataset, output, config, cache, years, label_mode):
             continue
         prices = table.open.loc[table.index.year.isin(years)]
         target = daily_target(table.index, pd.concat(scores), config).reindex(prices.index)
+        flags = table.filter(like="qa_").rename(columns=lambda name: name.removeprefix("qa_"))
+        diagnostics.observe(symbol, groups[symbol], prices, target, flags, config.target)
         curve = account(prices, target, config.round_trip_cost_bps)
         trades = trades_from_curve(curve, prices)
         row = {
@@ -240,6 +247,7 @@ def _run_daily(dataset, output, config, cache, years, label_mode):
         if i % 1000 == 0:
             print(f"daily evaluation {i}/{len(eligible)}", flush=True)
     frame = pd.DataFrame(records)
+    diagnostics.finish()
     frame["group"] = frame.symbol.map(groups)
     frame.to_csv(out / "leandro_cross_asset_metrics.csv", index=False)
     pd.DataFrame(rejected).to_csv(out / "leandro_rejected_symbols.csv", index=False)

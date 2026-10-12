@@ -1,5 +1,8 @@
 # Wristwatch: resultados de la POC, 10 de octubre de 2026
 
+La continuación del 12 de octubre agrega controles sobre las mismas señales,
+sin alterar estos resultados: [diagnóstico de calidad, lados y benchmarks](daily_diagnostics_results_2026-10-12.md).
+
 ## Cuatro experimentos separados
 
 1. **BTC histórico, replay de posiciones guardadas**: reproducción contable de

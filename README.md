@@ -170,3 +170,6 @@ Install `.[dev,research]` for the offline, unregistered
 [ecosystem/portfolio review](docs/research/quantito_ecosystem_audit_2026-10-10.md).
 This candidate is not approved for execution. Large datasets and run artifacts
 are excluded from Git.
+The [daily signal/data-quality diagnostics](docs/research/daily_diagnostics_results_2026-10-12.md)
+compare frozen long/short signals and exposure controls at zero and five bps,
+before a separate future execution study.
